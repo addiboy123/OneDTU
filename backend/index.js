@@ -15,13 +15,14 @@ const authenticationMiddleware=require('./middleware/authentication');
 
 
 // Import essentials and utils
-const connectDB= require('./util/db');
+const connect= require('./util/db');
 const express = require('express');
 const app = express();
 
 // Import Routers
-const jobsRouter=require('./routes/jobs');
+// const jobsRouter=require('./routes/jobs');
 const authRouter=require('./routes/auth');
+const hostelcartRouter = require('./routes/hostelcart');
 
 
 // Set security packages
@@ -40,7 +41,8 @@ app.use(xss());
 
 // Set Routes
 app.use('/api/v1/auth',authRouter);
-app.use('/api/v1/jobs',authenticationMiddleware,jobsRouter);
+// app.use('/api/v1/jobs',authenticationMiddleware,jobsRouter);
+app.use('/api/v1/hostelcart', hostelcartRouter);
 
 // Error Handling Middleware and Not Found Middleware
 app.use(notFoundMiddleware);
@@ -50,7 +52,9 @@ const port = process.env.PORT || 3000;
 
 const start = async () => {
   try {
-    await connectDB(process.env.MONGO_URI);
+    await connect(process.env.MONGO_URI);
+    // console.log("Connecting with URI:", process.env.MONGO_URI);
+
     console.log("DB connected");
     
     app.listen(port, () =>
