@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
 const user_schema = new mongoose.Schema({ 
 	profile_photo_url : {
@@ -12,7 +14,7 @@ const user_schema = new mongoose.Schema({
 
 	phoneNumber : {
 		type : String,
-		required : true,
+		required : false,
 		unique: true,
 		validate: {
 			validator: function(v) {
@@ -40,9 +42,12 @@ const user_schema = new mongoose.Schema({
         unique: true,
         sparse: true, // allow multiple nulls
     },
-	password : {
-		type : String,
-		required : true
+	password: {
+		type: String,
+		required: function () {
+			// required if user is NOT a Google-only user
+			return !this.googleId;
+		},
 	},
 	// store an array of references to items in the separate items collection
 	item: [
@@ -53,6 +58,21 @@ const user_schema = new mongoose.Schema({
 	]    
 });
 
+// Hash password before saving (only if modified)
+user_schema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Compare password
+user_schema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+// Create JWT
 user_schema.methods.createJWT = function () {
   return jwt.sign(
     {

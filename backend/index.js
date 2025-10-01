@@ -43,6 +43,9 @@ app.use(xss());
 app.use('/api/v1/auth',authRouter);
 // app.use('/api/v1/jobs',authenticationMiddleware,jobsRouter);
 app.use('/api/v1/hostelcart', hostelcartRouter);
+app.get('/', (req, res) => {
+  return res.json({msg: "Welcome to OneDTU API"});
+});
 
 // Error Handling Middleware and Not Found Middleware
 app.use(notFoundMiddleware);
