@@ -20,9 +20,10 @@ const express = require('express');
 const app = express();
 
 // Import Routers
-// const jobsRouter=require('./routes/jobs');
 const authRouter=require('./routes/auth');
-const hostelcartRouter = require('./routes/hostelcart');
+const hostelcartRouter = require('./routes/hostelcart.routes');
+const societyconnectRouter = require('./routes/SocietyConnect.routes');
+const findmyspaceRouter = require('./routes/FindMySpace.routes');
 
 
 // Set security packages
@@ -41,8 +42,9 @@ app.use(xss());
 
 // Set Routes
 app.use('/api/v1/auth',authRouter);
-// app.use('/api/v1/jobs',authenticationMiddleware,jobsRouter);
-app.use('/api/v1/hostelcart', hostelcartRouter);
+app.use('/api/v1/hostelcart', hostelcartRouter); // Add Authentication middleware to this??
+app.use('/api/v1/societyconnect',authenticationMiddleware,societyconnectRouter);
+app.use('/api/v1/findmyspace',authenticationMiddleware, findmyspaceRouter);
 app.get('/', (req, res) => {
   return res.json({msg: "Welcome to OneDTU API"});
 });

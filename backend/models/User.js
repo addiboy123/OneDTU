@@ -37,6 +37,7 @@ const user_schema = new mongoose.Schema({
 			message: props => `${props.value} is not a valid email!`
 		}
 	},
+
     googleId: {
         type: String,
         unique: true,
@@ -48,6 +49,21 @@ const user_schema = new mongoose.Schema({
 			// required if user is NOT a Google-only user
 			return !this.googleId;
 		},
+	},
+
+	Accomodations:{
+		PG:[
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "PGPost",
+			}
+		],
+		Flat:[
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "FlatPost",
+			}
+		]
 	},
 	// store an array of references to items in the separate items collection
 	item: [
