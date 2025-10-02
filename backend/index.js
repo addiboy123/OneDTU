@@ -42,7 +42,7 @@ app.use(xss());
 
 // Set Routes
 app.use('/api/v1/auth',authRouter);
-app.use('/api/v1/hostelcart', hostelcartRouter); // Add Authentication middleware to this??
+app.use('/api/v1/hostelcart', hostelcartRouter);
 app.use('/api/v1/societyconnect',authenticationMiddleware,societyconnectRouter);
 app.use('/api/v1/findmyspace',authenticationMiddleware, findmyspaceRouter);
 app.get('/', (req, res) => {
