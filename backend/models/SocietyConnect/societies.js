@@ -11,11 +11,11 @@ const societySchema = new Schema({
     },
     description: {
         type: String,
-        required: true
+        required: false
     },
     contactDetails: {
         type: String,
-        required: true
+        required: false
     },
     images: [{
         type: String // URLs to images for the society (e.g., logo, cover photo)

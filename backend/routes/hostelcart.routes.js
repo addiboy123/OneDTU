@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const controller = require("../controllers/hostelcart/user.items");
+const controller = require("../controllers/hostelcart/item");
 const authenticationMiddleware = require("../middleware/authentication");
 
 // use memory storage because controller expects file.buffer

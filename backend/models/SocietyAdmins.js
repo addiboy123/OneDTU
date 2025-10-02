@@ -23,4 +23,19 @@ const societyAdminSchema = new Schema({
     }
 }, { timestamps: true });
 
+const bcrypt = require('bcryptjs');
+
+// Hash password before saving
+societyAdminSchema.pre('save', async function(next) {
+    if (!this.isModified('password')) return next();
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+});
+
+// method to compare password
+societyAdminSchema.methods.comparePassword = async function(candidatePassword) {
+    return bcrypt.compare(candidatePassword, this.password);
+};
+
 module.exports = mongoose.model('SocietyAdmin', societyAdminSchema);
