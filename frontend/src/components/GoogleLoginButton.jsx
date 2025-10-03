@@ -16,9 +16,18 @@ function GoogleLoginButton() {
   }, []);
 
   const handleCredentialResponse = async (response) => {
-    const data = await googleLogin(response.credential);
-    console.log("Google Auth Response:", data);
-    localStorage.setItem("token", data.token); // store JWT
+    try {
+      const cred = response?.credential;
+      if (!cred) {
+        console.error("No credential in Google response", response);
+        return;
+      }
+      const data = await googleLogin(cred);
+      console.log("Google Auth Response:", data);
+      if (data?.token) localStorage.setItem("token", data.token);
+    } catch (err) {
+      console.error("Google login failed:", err);
+    }
   };
 
   return <div id="google-signin"></div>;

@@ -7,29 +7,26 @@ const { UnauthenticatedError } = require("../errors");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const googleLogin = async (req, res) => {
-  const { token } = req.body;
-
-  if (!token) throw new UnauthenticatedError("No Google token provided");
+  // accept multiple names from client
+  console.log('Incoming google login body:', req.body);
+  const token = req.body.token || req.body.credential || req.body.id_token;
+  if (!token) return res.status(401).json({ msg: 'No Google token provided' });
 
   try {
-    // Verify token with Google
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-
     const payload = ticket.getPayload();
-    const { sub: googleId, email, name, picture } = payload;
+    const { email, name, picture, sub } = payload;
 
-    // Check if user already exists by email
     let user = await User.findOne({ email });
-
     if (!user) {
-      // Google signup: user doesn't exist
+      // create user WITHOUT phoneNumber to avoid duplicate-null insertion
       user = await User.create({
-        email,
         name,
-        googleId,
+        email,
+        googleId: sub,
         profile_photo_url: picture,
       });
     } else if (!user.googleId) {
@@ -51,8 +48,8 @@ const googleLogin = async (req, res) => {
       token: customToken,
     });
   } catch (error) {
-    console.error(error);
-    throw new UnauthenticatedError("Google login failed");
+    console.error('Google token verify error:', error && error.message ? error.message : error);
+    return res.status(401).json({ msg: 'Invalid Google token', error: error.message || error });
   }
 };
 
@@ -74,7 +71,7 @@ const register = async (req, res) => {
   res.status(StatusCodes.CREATED).json({ user: { name }, token });
 }
 const login = async (req, res) => {
-
+  console.log("Login attempt");
   const { email, password } = req.body;
   if (!email || !password) {
     throw new BadRequestError('Please provide email and Password');

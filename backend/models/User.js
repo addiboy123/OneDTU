@@ -102,6 +102,11 @@ user_schema.methods.createJWT = function () {
   );
 };
 
+user_schema.index(
+  { phoneNumber: 1 },
+  { unique: true, partialFilterExpression: { phoneNumber: { $type: "string" } } }
+);
+
 const user_details =  mongoose.model("users", user_schema);
 module.exports = user_details;
 

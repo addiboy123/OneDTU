@@ -1,5 +1,8 @@
 import AuthForm from "../components/AuthForm";
 import { signupUser } from "../api/auth";
+import GoogleLoginButton from "../components/GoogleLoginButton";
+import Navbar from "../components/Navbar";
+
 
 function Signup() {
   const handleSignup = async (data) => {
@@ -9,10 +12,12 @@ function Signup() {
   };
 
   return (
-    <div>
-      <h2>Signup</h2>
-      <AuthForm onSubmit={handleSignup} type="signup" />
-    </div>
+    <>
+      <Navbar />
+      <AuthForm onSubmit={handleSignup} type="signup">
+        <GoogleLoginButton />
+      </AuthForm>
+    </>
   );
 }
 

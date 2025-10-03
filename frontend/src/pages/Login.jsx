@@ -1,6 +1,7 @@
 import AuthForm from "../components/AuthForm";
 import { loginUser } from "../api/auth";
 import GoogleLoginButton from "../components/GoogleLoginButton";
+import Navbar from "../components/Navbar";
 
 function Login() {
   const handleLogin = async (data) => {
@@ -10,11 +11,12 @@ function Login() {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <AuthForm onSubmit={handleLogin} type="login" />
-      <GoogleLoginButton />
-    </div>
+    <>
+      <Navbar />
+      <AuthForm onSubmit={handleLogin} type="login">
+        <GoogleLoginButton />
+      </AuthForm>
+    </>
   );
 }
 
