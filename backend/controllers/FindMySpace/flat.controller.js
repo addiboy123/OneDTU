@@ -1,7 +1,7 @@
 const FlatPost = require('../../models/FindMySpace/FlatPosts'); // Ensure correct model path
 const User = require('../../models/User'); // Import the User model
 const { StatusCodes } = require('http-status-codes');
-const { BadRequestError, NotFoundError, UnauthorizedError } = require('../../errors');
+const { BadRequestError, NotFoundError, UnauthenticatedError } = require('../../errors');
 const { uploadImage, deleteFile } = require('../../util/cloud'); // Import cloud utility functions
 
 /**
@@ -36,29 +36,38 @@ exports.getFlatById = async (req, res) => {
  * @access  Private
  */
 exports.createFlat = async (req, res) => {
-    // 1. Set the creator's ID
-    req.body.createdBy = req.user.userId;
+    const { userId } = req.user;
+    const { title, description, address, pricePerPerson, distanceFromDtu } = req.body;
+
+    // 1. Validate required text fields
+    if (!title || !description || !address || !pricePerPerson || !distanceFromDtu) {
+        throw new BadRequestError('Title, description, address, pricePerPerson, and distanceFromDtu are required fields.');
+    }
 
     // 2. Handle image uploads to Cloudinary
     let imageUrls = [];
     if (req.files && req.files.length > 0) {
-        // Create an array of upload promises
         const uploadPromises = req.files.map(file => uploadImage(file.buffer));
-        // Wait for all uploads to complete
         const uploadResults = await Promise.all(uploadPromises);
-        // Get the secure URLs from the results
+        // **FIXED**: Correctly map over the results array to get each URL
         imageUrls = uploadResults.map(result => result.secure_url || result.url);
+    } else {
+        throw new BadRequestError('At least one image is required');
     }
-    req.body.images = imageUrls;
 
-    // 3. Create the flat post document in the database
-    const flat = await FlatPost.create(req.body);
+    // 3. Create a clean data object for the new flat
+    const flatData = {
+        ...req.body,
+        images: imageUrls,
+        createdBy: userId,
+    };
 
-    // 4. Add the new flat's ID to the user's document for reference
+    const flat = await FlatPost.create(flatData);
+
+    // 4. Add the new flat's ID to the user's document
     await User.findByIdAndUpdate(
-        req.user.userId,
-        { $push: { 'Accomodations.Flat': flat._id } },
-        { new: true, runValidators: true }
+        userId,
+        { $push: { 'Accomodations.Flat': flat._id } }
     );
 
     res.status(StatusCodes.CREATED).json({ message: 'Flat listing created successfully', flat });
@@ -80,21 +89,22 @@ exports.updateFlat = async (req, res) => {
 
     // Authorization check
     if (flat.createdBy.toString() !== userId) {
-        throw new UnauthorizedError('You are not authorized to update this listing');
+        throw new UnauthenticatedError('You are not authorized to update this listing');
     }
 
-    // Update text fields from req.body
+    // Update text fields explicitly
     Object.assign(flat, req.body);
     
     // 1. Handle deletion of existing images
-    let deletedImages = req.body.deletedImages;
+    let { deletedImages } = req.body;
     if (deletedImages) {
-        // Ensure deletedImages is an array
+        // Robustly parse if it's a JSON string
+        if (typeof deletedImages === 'string') {
+            try { deletedImages = JSON.parse(deletedImages); } catch (e) { /* ignore parse error */ }
+        }
         const imagesToDelete = Array.isArray(deletedImages) ? deletedImages : [deletedImages];
         if (imagesToDelete.length > 0) {
-            // Delete files from Cloudinary
             await Promise.all(imagesToDelete.map(url => deleteFile(url)));
-            // Filter out the deleted images from the flat's image array
             flat.images = flat.images.filter(imgUrl => !imagesToDelete.includes(imgUrl));
         }
     }
@@ -104,8 +114,7 @@ exports.updateFlat = async (req, res) => {
         const uploadPromises = req.files.map(file => uploadImage(file.buffer));
         const uploadResults = await Promise.all(uploadPromises);
         const newImageUrls = uploadResults.map(result => result.secure_url || result.url);
-        // Add the new image URLs to the existing ones
-        flat.images = [...flat.images, ...newImageUrls];
+        flat.images.push(...newImageUrls); // Use push with spread operator for efficiency
     }
 
     await flat.save();
@@ -129,7 +138,7 @@ exports.deleteFlat = async (req, res) => {
 
     // Authorization check
     if (flat.createdBy.toString() !== userId) {
-        throw new UnauthorizedError('You are not authorized to delete this listing');
+        throw new UnauthenticatedError('You are not authorized to delete this listing');
     }
 
     // 1. Delete all associated images from Cloudinary
@@ -140,8 +149,8 @@ exports.deleteFlat = async (req, res) => {
     // 2. Remove the flat reference from the user's document
     await User.findByIdAndUpdate(userId, { $pull: { 'Accomodations.Flat': flatId } });
 
-    // 3. Delete the flat document from the database
-    await flat.remove();
+    // 3. **FIXED**: Use findByIdAndDelete instead of the deprecated .remove()
+    await FlatPost.findByIdAndDelete(flatId);
 
     res.status(StatusCodes.OK).json({ message: 'Flat listing deleted successfully' });
 };

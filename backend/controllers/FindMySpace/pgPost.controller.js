@@ -2,7 +2,7 @@ const PGPost = require('../../models/FindMySpace/PGPost'); // Adjust path as nee
 const PG = require('../../models/FindMySpace/PG'); // Import parent PG model
 const User = require('../../models/User'); // Import User model
 const { StatusCodes } = require('http-status-codes');
-const { BadRequestError, NotFoundError, UnauthorizedError } = require('../../errors');
+const { BadRequestError, NotFoundError, UnauthenticatedError } = require('../../errors');
 const { uploadImage, deleteFile } = require('../../util/cloud'); // Import cloud utility functions
 
 /**
@@ -38,10 +38,11 @@ exports.getPostById = async (req, res) => {
  */
 exports.createPost = async (req, res) => {
     const { userId } = req.user;
-    const { pgId } = req.body;
+    const { pgId, roommates_required, title, description } = req.body;
 
-    if (!pgId) {
-        throw new BadRequestError('Parent PG ID (pgId) is required');
+    // **FIXED**: Added validation for all required fields from the schema
+    if (!pgId || !roommates_required || !title || !description) {
+        throw new BadRequestError('pgId, title, description, and roommates_required are all required fields.');
     }
 
     const parentPG = await PG.findById(pgId);
@@ -49,20 +50,27 @@ exports.createPost = async (req, res) => {
         throw new NotFoundError(`Parent PG with id ${pgId} not found`);
     }
 
+    let roomImageUrl;
     // Handle single image upload for 'roomImage'
     if (req.files && req.files.length > 0) {
-        // Taking the first file as the room image
         const file = req.files[0];
         const uploadResult = await uploadImage(file.buffer);
-        req.body.roomImage = uploadResult.secure_url || uploadResult.url;
+        roomImageUrl = uploadResult.secure_url || uploadResult.url;
     } else {
         throw new BadRequestError('A room image is required.');
     }
 
-    req.body.createdBy = userId;
-    req.body.parentPG = pgId;
+    // Create a new object with only the required fields to prevent unwanted data injection
+    const postData = {
+        title,
+        description,
+        roommates_required,
+        roomImage: roomImageUrl,
+        createdBy: userId,
+        parentPG: pgId
+    };
 
-    const post = await PGPost.create(req.body);
+    const post = await PGPost.create(postData);
 
     // Update references in parent PG and User documents
     await PG.findByIdAndUpdate(pgId, { $push: { posts: post._id } });
@@ -79,6 +87,7 @@ exports.createPost = async (req, res) => {
 exports.updatePost = async (req, res) => {
     const { postId } = req.params;
     const { userId } = req.user;
+    const { title, description, roommates_required } = req.body;
 
     const post = await PGPost.findById(postId);
     if (!post) {
@@ -87,19 +96,19 @@ exports.updatePost = async (req, res) => {
 
     // Authorization check
     if (post.createdBy.toString() !== userId) {
-        throw new UnauthorizedError('You are not authorized to update this post');
+        throw new UnauthenticatedError('You are not authorized to update this post');
     }
 
-    // Update text fields
-    Object.assign(post, req.body);
+    // **FIXED**: Explicitly update fields to ensure required fields aren't set to empty
+    if (title) post.title = title;
+    if (description) post.description = description;
+    if (roommates_required) post.roommates_required = roommates_required;
 
     // Check for and handle a new image upload
     if (req.files && req.files.length > 0) {
-        // 1. Delete the old image from Cloudinary if it exists
         if (post.roomImage) {
             await deleteFile(post.roomImage);
         }
-        // 2. Upload the new image
         const file = req.files[0];
         const uploadResult = await uploadImage(file.buffer);
         post.roomImage = uploadResult.secure_url || uploadResult.url;
@@ -126,20 +135,18 @@ exports.deletePost = async (req, res) => {
 
     // Authorization check
     if (post.createdBy.toString() !== userId) {
-        throw new UnauthorizedError('You are not authorized to delete this post');
+        throw new UnauthenticatedError('You are not authorized to delete this post');
     }
 
-    // 1. Delete the image from Cloudinary
     if (post.roomImage) {
         await deleteFile(post.roomImage);
     }
 
-    // 2. Remove references from parent PG and User documents
     await PG.findByIdAndUpdate(post.parentPG, { $pull: { posts: postId } });
     await User.findByIdAndUpdate(userId, { $pull: { 'Accomodations.PG': postId } });
 
-    // 3. Delete the post document from the database
-    await post.remove();
+    // **FIXED**: Use findByIdAndDelete instead of the deprecated .remove()
+    await PGPost.findByIdAndDelete(postId);
 
     res.status(StatusCodes.OK).json({ message: 'Post deleted successfully' });
 };

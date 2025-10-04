@@ -46,7 +46,7 @@ app.use('/api/v1/auth',authRouter);
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/hostelcart', hostelcartRouter);
 app.use('/api/v1/societyconnect', societyconnectRouter);
-app.use('/api/v1/findmyspace',authenticationMiddleware, findmyspaceRouter);
+app.use('/api/v1/findmyspace', findmyspaceRouter);
 app.get('/', (req, res) => {
   return res.json({msg: "Welcome to OneDTU API"});
 });

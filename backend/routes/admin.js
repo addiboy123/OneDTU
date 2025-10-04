@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const adminController = require('../controllers/admin/admin');
 const adminSocietyController = require('../controllers/admin/societyAdmin');
 const authenticationAdmin = require('../middleware/authentication.admin');
@@ -7,7 +8,7 @@ const adminSocietyControllerSimple = require('../controllers/admin/society');
 const PgController = require('../controllers/admin/pg');
 
 
-
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/register', adminController.register);
 router.post('/login', adminController.login);
@@ -23,8 +24,8 @@ router.put('/update-society', authenticationAdmin, adminSocietyControllerSimple.
 router.delete('/delete-society', authenticationAdmin, adminSocietyControllerSimple.deleteSociety);
 
 // Protected: only admins can manage PGs
-router.post('/create-pg', authenticationAdmin, PgController.createPG);
-router.put('/update-pg', authenticationAdmin, PgController.updatePG);
+router.post('/create-pg', authenticationAdmin, upload.array("images", 5), PgController.createPG);
+router.put('/update-pg', authenticationAdmin, upload.array("images", 5), PgController.updatePG);
 router.delete('/delete-pg', authenticationAdmin, PgController.deletePG);
 
 module.exports = router;

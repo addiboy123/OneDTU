@@ -3,6 +3,15 @@ const { Schema } = mongoose;
 
 // Schema for individual rooms/listings within a PG
 const pgPostSchema = new Schema({
+    title: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    description: {
+        type: String,
+        required: true
+    },
     roommates_required: {
         type: Number,
         required: true,
