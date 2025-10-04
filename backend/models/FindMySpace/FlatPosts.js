@@ -33,6 +33,12 @@ const flatPostSchema = new Schema({
     },
     googleMapLink: {
         type: String
+    },
+    // Add this field to track the creator of the post
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'users', // This should match the name of your User model
+        required: true
     }
 }, { timestamps: true });
 
