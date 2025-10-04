@@ -25,12 +25,25 @@ const Home = () => {
         </p>
 
         <div className="flex gap-4 justify-center">
-          <Button asChild className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg text-lg">
-            <Link to="/signup">Get Started</Link>
-          </Button>
-          <Button variant="outline" asChild className="border-blue-600 text-blue-400 hover:bg-blue-600/20 px-6 py-3 rounded-lg text-lg">
-            <Link to="/login">Sign In</Link>
-          </Button>
+          {/* If logged in show greeting; else show CTA */}
+          {(() => {
+            try {
+              const decoded = JSON.parse(atob((localStorage.getItem('token')||'').split('.')[1] || '')) || null;
+              if (decoded && decoded.exp * 1000 > Date.now()) {
+                return <div className="text-lg text-gray-200">Hi! {decoded.name || decoded.fullName || decoded.email}</div>;
+              }
+            } catch (e) {}
+            return (
+              <>
+                <Button asChild className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg text-lg">
+                  <Link to="/signup">Get Started</Link>
+                </Button>
+                <Button variant="outline" asChild className="border-blue-600 text-blue-400 hover:bg-blue-600/20 px-6 py-3 rounded-lg text-lg">
+                  <Link to="/login">Sign In</Link>
+                </Button>
+              </>
+            );
+          })()}
         </div>
       </main>
 

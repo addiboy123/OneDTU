@@ -36,6 +36,9 @@ comment on a post //only for authenticated users, implement pagination ....done
 like/unlike a post //only for authenticated users ...done
 like/unlike a comment on a post //only for authenticated users ....done
 
+get all societies that a user follows //authenticated users ....not done
+get all posts from societies that a user follows //authenticated users, main page thingy, implement pagination .....not done
+
 */
 
 
