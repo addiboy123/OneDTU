@@ -9,7 +9,7 @@ const authenticationMiddleware = require("../middleware/authentication");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Public
-router.get("/items", controller.getAllItems);
+router.get("/all-items", controller.getAllItems);
 router.get("/categories", categoriesController.getCategories);
 
 // Protected routes (authentication handled here)

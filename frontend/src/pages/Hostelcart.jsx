@@ -29,7 +29,6 @@ const HostelCart = () => {
       setCurrentUser({
         userId: decoded.userId || decoded.sub || decoded.id,
         name: decoded.name || decoded.fullName || decoded.given_name,
-        college: decoded.college,
         phoneNumber: decoded.phoneNumber,
         email: decoded.email,
       });
@@ -54,7 +53,7 @@ const HostelCart = () => {
 
             // Fetch my items
       try {
-      const myRes = await api.get(`/user/get-my-items?userId=${decoded.userId}`);
+      const myRes = await api.get('/hostelcart/items/');
             if (mounted) {
                 setUserItems(myRes?.data?.success ? myRes.data.items : []);
             }
@@ -65,7 +64,7 @@ const HostelCart = () => {
 
             // Fetch other items
       try {
-      const otherRes = await api.get(`/user/get-other-items?collegeId=${decoded.college}&userId=${decoded.userId}`);
+      const otherRes = await api.get('/hostelcart/items/others');
             if (mounted) {
                 setOtherItems(otherRes?.data?.success ? otherRes.data.items : []);
             }
@@ -77,7 +76,7 @@ const HostelCart = () => {
         } else {
             // Unauthenticated users → fetch all items
       try {
-      const res = await api.get(`/user/get-all-items`);
+      const res = await api.get(`/hostelcart/all-items`);
             if (mounted) {
                 setOtherItems(res?.data?.success ? res.data.items : []);
                 setUserItems([]);
