@@ -29,7 +29,7 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/category");
+      const response = await api.get("/hostelcart/categories");
       setCategories(response.data.data || []);
     } catch (err) {
       setError("Failed to fetch categories");
@@ -52,7 +52,7 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
       formData.append("itemCategory", category);
       images.forEach((image) => formData.append("images", image));
 
-      const response = await api.post("/user/add-items", formData, {
+      const response = await api.post("/hostelcart/items", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

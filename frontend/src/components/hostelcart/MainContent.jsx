@@ -20,7 +20,7 @@ export function MainContent({
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/category");
+      const response = await api.get("/hostelcart/categories");
       setCategories(response.data.data || []);
       setCategoryIds(response.data.categoryIds || []);
     } catch (err) {

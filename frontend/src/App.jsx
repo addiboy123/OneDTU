@@ -15,7 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/hostelcart" element={<HostelCart />} />
-  <Route path="/societyconnect" element={<SocietyConnect />} />
+        <Route path="/societyconnect" element={<SocietyConnect />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>

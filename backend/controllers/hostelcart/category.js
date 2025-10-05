@@ -1,4 +1,4 @@
-const Category = require("../models/categories");
+const Category = require("../../models/hostelcart/Category");
 
 exports.getCategories = async (req, res) => {
     try {
