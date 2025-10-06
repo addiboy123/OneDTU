@@ -25,6 +25,7 @@ const hostelcartRouter = require('./routes/hostelcart.routes');
 const societyconnectRouter = require('./routes/societyconnect.routes');
 const findmyspaceRouter = require('./routes/findmyspace.routes');
 const adminRouter = require('./routes/admin');
+const userRouter = require('./routes/user');
 
 
 // Set security packages
@@ -47,6 +48,7 @@ app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/hostelcart', hostelcartRouter);
 app.use('/api/v1/societyconnect', societyconnectRouter);
 app.use('/api/v1/findmyspace', findmyspaceRouter);
+app.use('/api/v1/user', userRouter);
 app.get('/', (req, res) => {
   return res.json({msg: "Welcome to OneDTU API"});
 });

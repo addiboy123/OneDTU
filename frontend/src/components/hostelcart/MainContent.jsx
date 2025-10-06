@@ -17,6 +17,10 @@ export function MainContent({
   const [categoryIds, setCategoryIds] = useState([]);
   const [selectedCategoryName, setSelectedCategoryName] = useState("");
 
+  // server-side filtered items when a category is selected
+  const [apiFilteredItems, setApiFilteredItems] = useState(null);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+
   const fetchCategories = async () => {
     setLoading(true);
     try {
@@ -34,22 +38,64 @@ export function MainContent({
     fetchCategories();
   }, []);
 
-  const filteredItems = allItems.filter((item) => {
-    const matchesSearch =
-      !searchQuery.trim() ||
-      item.itemName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.itemDescription.toLowerCase().includes(searchQuery.toLowerCase());
+  // when user selects a category name, find corresponding categoryId and call backend:
+  // GET /hostelcart/items/by-category?categoryId=<id>
+  useEffect(() => {
+    let mounted = true;
+    const fetchByCategory = async () => {
+      if (!selectedCategoryName) {
+        setApiFilteredItems(null);
+        return;
+      }
 
-    const matchesCategory =
-      !selectedCategoryName ||
-      (() => {
-        const index = categories.indexOf(selectedCategoryName);
-        const correspondingCategoryId = categoryIds[index];
-        return item.itemCategory === correspondingCategoryId;
-      })();
+      const idx = categories.indexOf(selectedCategoryName);
+      const categoryId = categoryIds[idx];
+      if (!categoryId) {
+        setApiFilteredItems([]);
+        return;
+      }
 
-    return matchesSearch && matchesCategory;
-  });
+      setCategoryLoading(true);
+      try {
+        const res = await api.get("/hostelcart/items/by-category", {
+          params: { categoryId },
+        });
+        // expect res.data.items (fallback to res.data.data)
+        const itemsFromApi = res.data.items ?? res.data.data ?? [];
+        if (mounted) setApiFilteredItems(itemsFromApi);
+      } catch (err) {
+        console.error("Failed to fetch items by category:", err);
+        if (mounted) setApiFilteredItems([]);
+      } finally {
+        if (mounted) setCategoryLoading(false);
+      }
+    };
+
+    fetchByCategory();
+    return () => {
+      mounted = false;
+    };
+  }, [selectedCategoryName, categories, categoryIds]);
+
+  // choose source: server-filtered when a category is selected, otherwise client-provided allItems
+  const filteredItems = (() => {
+    const applySearch = (items) =>
+      (items || []).filter((item) => {
+        if (!searchQuery.trim()) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+          (item.itemName || "").toLowerCase().includes(q) ||
+          (item.itemDescription || "").toLowerCase().includes(q)
+        );
+      });
+
+    if (selectedCategoryName) {
+      if (categoryLoading) return [];
+      return applySearch(apiFilteredItems ?? []);
+    }
+
+    return applySearch(allItems);
+  })();
 
   return (
     <ScrollArea className="flex-1 p-6 max-h-[80vh] overflow-y-auto bg-gray-50">

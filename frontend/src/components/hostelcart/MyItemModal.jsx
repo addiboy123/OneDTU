@@ -69,7 +69,7 @@ export function MyItemModal({ isOpen, onClose, item, onUpdateItem, onDeleteItem 
     newImages.forEach((file) => formData.append("updatedImages", file))
 
     try {
-      const response = await api.patch("/user/update-item", formData, {
+      const response = await api.patch("/hostelcart/items", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       console.log("Updated item:", response.data.message);
@@ -97,7 +97,7 @@ export function MyItemModal({ isOpen, onClose, item, onUpdateItem, onDeleteItem 
 
   const confirmDelete = async () => {
     try {
-      await api.delete("/user/delete-item", {
+      await api.delete("/hostelcart/items", {
         data: { userId, itemId: item._id },
       })
       onDeleteItem(item._id)

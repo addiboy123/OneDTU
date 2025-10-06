@@ -116,7 +116,7 @@ const HostelCart = () => {
 
   return (
     <div>
-      <Navbar userName={currentUser?.name} userPhone={currentUser?.phoneNumber} />
+      <Navbar />
       <div className="flex flex-1 overflow-hidden">
         {isAuth && (
           <Sidebar

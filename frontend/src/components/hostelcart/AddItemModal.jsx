@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { X } from "lucide-react";
 import getDecodedToken from "../../lib/auth";
 import api from "../../api/interceptor";
+import CreatePhoneNumberPrompt from "./CreatePhoneNumberPrompt";
 
 export function AddItemModal({ isOpen, onClose,onItemAdded }) {
   const [name, setName] = useState("");
@@ -21,6 +22,7 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
 
   const decodedUser = getDecodedToken();
   const userId = decodedUser?.userId;
+  const userPhone = decodedUser?.phoneNumber;
 
   useEffect(() => {
     if (isOpen) fetchCategories();
@@ -42,6 +44,12 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
     e.preventDefault();
     setUploading(true);
     setError(null);
+    // guard: user must have a phone number set in token
+    if (!userPhone) {
+      setError("You must set your phone number before creating an item.");
+      setUploading(false);
+      return;
+    }
 
     try {
       const formData = new FormData();
@@ -52,9 +60,7 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
       formData.append("itemCategory", category);
       images.forEach((image) => formData.append("images", image));
 
-      const response = await api.post("/hostelcart/items", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const response = await api.post("/hostelcart/items", formData);
 
       if (response.status !== 201) throw new Error("Failed to add item");
       
@@ -92,8 +98,11 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Add New Item</DialogTitle>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {/* If user has no phoneNumber, show prompt and prevent form submission */}
+        {!userPhone ? (
+          <CreatePhoneNumberPrompt onClose={onClose} />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-5">
           <Input
             placeholder="Item Name"
             value={name}
@@ -186,7 +195,8 @@ export function AddItemModal({ isOpen, onClose,onItemAdded }) {
               Cancel
             </Button>
           </DialogFooter>
-        </form>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
