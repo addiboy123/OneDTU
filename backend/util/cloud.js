@@ -69,6 +69,7 @@ const deleteFile = async (imageUrl) => {
 
 const getPublicIdFromUrl = (url) => {
     try {
+        url = String(url);
         const parts = url.split("/");
         return parts[parts.length - 1].split(".")[0];
     } catch (error) {

@@ -1,5 +1,5 @@
 import AuthForm from "../components/AuthForm";
-import { loginUser } from "../api/auth";
+import { useAuth } from "../context/AuthContext";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
@@ -7,12 +7,11 @@ import { useNavigate } from "react-router-dom";
 function Login() {
   const navigate = useNavigate();
 
+  const { login } = useAuth();
   const handleLogin = async (data) => {
-    const res = await loginUser(data);
+    const res = await login(data);
     console.log("Login Response:", res);
     if (res.token) {
-      localStorage.setItem("token", res.token);
-      // navigate to home after successful login
       navigate("/");
     }
   };

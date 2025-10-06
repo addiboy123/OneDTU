@@ -16,10 +16,9 @@ const pgPostSchema = new Schema({
         type: Number,
         required: true,
     },
-    roomImage: {
-        type: String, // URL to the image
-        required: true
-    },
+    roomImage: [{
+        type: String // Array of image URLs
+    }],
     // Add this field to link the room to its main PG
     parentPG: {
         type: Schema.Types.ObjectId,

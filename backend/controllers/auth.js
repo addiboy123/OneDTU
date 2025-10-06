@@ -41,6 +41,7 @@ const googleLogin = async (req, res) => {
     res.status(StatusCodes.OK).json({
       user: {
         name: user.name,
+        _id: user._id,
         email: user.email,
         phoneNumber: user.phoneNumber,
         profile_photo_url: user.profile_photo_url,
@@ -68,7 +69,7 @@ const register = async (req, res) => {
 
   const user = await User.create({ email, name, password });
   const token = user.createJWT();
-  res.status(StatusCodes.CREATED).json({ user: { name }, token });
+  res.status(StatusCodes.CREATED).json({ user: { name , _id: user._id }, token });
 }
 const login = async (req, res) => {
   console.log("Login attempt");
@@ -79,7 +80,7 @@ const login = async (req, res) => {
   const user = await User.findOne({ email });
   if (!user || !await user.comparePassword(password)) throw new UnauthenticatedError('Please enter valid email and password');
   const token = user.createJWT();
-  res.status(StatusCodes.OK).json({ user: { name: user.name }, token });
+  res.status(StatusCodes.OK).json({ user: { name: user.name , _id: user._id }, token });
 }
 
 module.exports = {
