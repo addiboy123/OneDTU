@@ -5,6 +5,7 @@ import Signup from "./pages/Signup";
 import HostelCart from "./pages/Hostelcart";
 import Profile from "./pages/Profile";
 import SocietyConnect from "./pages/Societyconnect";
+import Society from "./pages/Society";
 import './index.css'; 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/hostelcart" element={<HostelCart />} />
         <Route path="/societyconnect" element={<SocietyConnect />} />
+        <Route path="/societyconnect/:name" element={<Society />} />
         <Route path="/profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>

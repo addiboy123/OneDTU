@@ -1,94 +1,84 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "../../api/interceptor";
+import { useNavigate } from "react-router-dom";
+import { ScrollArea } from "../ui/scroll-area";
+import { ShoppingCart } from "lucide-react";
 
 function Explore() {
+  const [societies, setSocieties] = useState([]);
   const [selectedSociety, setSelectedSociety] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Static sample societies (no API calls)
-  const societies = [
-    {
-      _id: "s1",
-      name: "Photography Club",
-      coverImage: "https://picsum.photos/seed/photography/600/400",
-      description:
-        "A place for students who love photography. We organise walks, workshops and exhibitions.",
-      images: [
-        "https://picsum.photos/seed/phot1/400/300",
-        "https://picsum.photos/seed/phot2/400/300",
-        "https://picsum.photos/seed/phot3/400/300",
-      ],
-    },
-    {
-      _id: "s2",
-      name: "Coding Society",
-      coverImage: "https://picsum.photos/seed/coding/600/400",
-      description:
-        "Weekly coding challenges, hackathons and study groups for all levels.",
-      images: [
-        "https://picsum.photos/seed/code1/400/300",
-        "https://picsum.photos/seed/code2/400/300",
-      ],
-    },
-    {
-      _id: "s3",
-      name: "Drama Circle",
-      coverImage: "https://picsum.photos/seed/drama/600/400",
-      description: "Plays, improv nights and open-mic sessions every month.",
-      images: ["https://picsum.photos/seed/dram1/400/300"],
-    },
-    {
-      _id: "s4",
-      name: "Music Society",
-      coverImage: "https://picsum.photos/seed/music/600/400",
-      description: "Jamming sessions, concerts and music-production workshops.",
-      images: ["https://picsum.photos/seed/mus1/400/300", "https://picsum.photos/seed/mus2/400/300"],
-    },
-  ];
+  useEffect(() => {
+    let mounted = true;
+    const fetch = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/societyconnect/societies');
+        const data = res?.data?.societies ?? res?.data ?? [];
+        if (mounted) setSocieties(data);
+      } catch (err) {
+        console.error('Failed to fetch societies', err);
+        if (mounted) setError('Failed to fetch societies');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetch();
+    return () => (mounted = false);
+  }, []);
+
+  const navigate = useNavigate();
+
+  const openSociety = (s) => {
+    const safeName = encodeURIComponent(s.name);
+    navigate(`/societyconnect/${safeName}`, { state: { id: s._id } });
+  };
 
   return (
-    <div className="grid grid-cols-4 gap-4">
-      {societies.map((society) => (
-        <div
-          key={society._id}
-          className="cursor-pointer bg-white rounded-lg shadow hover:shadow-md p-3"
-          onClick={() => setSelectedSociety(society)}
-        >
-          <img
-            src={society.coverImage}
-            alt={society.name}
-            className="rounded-md h-32 w-full object-cover mb-2"
-          />
-          <h3 className="font-semibold text-gray-800">{society.name}</h3>
+    <ScrollArea className="p-6">
+      <div className="max-w-6xl mx-auto">
+        <div className="sticky top-0 z-10 bg-white p-6 rounded-xl shadow-md border border-gray-200 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Explore Societies</h2>
         </div>
-      ))}
 
-      {/* Society Modal */}
-      {selectedSociety && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white rounded-xl p-6 w-96 relative">
-            <button
-              className="absolute top-2 right-3 text-gray-500"
-              onClick={() => setSelectedSociety(null)}
-            >
-              ×
-            </button>
-            <h3 className="text-2xl font-bold mb-2">{selectedSociety.name}</h3>
-            <p className="text-gray-600 mb-4">
-              {selectedSociety.description || "No description available"}
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {selectedSociety.images?.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img}
-                  alt="society"
-                  className="rounded-lg object-cover h-24 w-full"
-                />
-              ))}
-            </div>
+        {loading ? (
+          <div className="text-center py-12">Loading societies…</div>
+        ) : error ? (
+          <div className="text-center py-12 text-red-500">{error}</div>
+        ) : societies.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-lg shadow-md mt-6 border border-gray-200">
+            <ShoppingCart className="h-16 w-16 mb-4 text-gray-400" />
+            <h3 className="text-xl font-medium text-gray-800">No societies found</h3>
+            <p className="text-gray-500">There are no societies to show right now.</p>
           </div>
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {societies.map((s) => (
+              <div
+                key={s._id}
+                className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer"
+                onClick={() => openSociety(s)}
+              >
+                <div className="relative overflow-hidden rounded-t-lg">
+                  <img
+                    src={(s.images && s.images[0]) || '/placeholder.svg'}
+                    alt={s.name}
+                    className="w-full h-44 object-cover transition-transform duration-500 hover:scale-105"
+                  />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg text-gray-900">{s.name}</h3>
+                  <p className="text-sm text-gray-600 line-clamp-2">{s.description || 'No description'}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </ScrollArea>
   );
 }
 
