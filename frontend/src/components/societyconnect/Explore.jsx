@@ -1,34 +1,21 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import api from "../../api/interceptor";
 import { useNavigate } from "react-router-dom";
 import { ScrollArea } from "../ui/scroll-area";
 import { ShoppingCart } from "lucide-react";
 
 function Explore() {
-  const [societies, setSocieties] = useState([]);
   const [selectedSociety, setSelectedSociety] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let mounted = true;
-    const fetch = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get('/societyconnect/societies');
-        const data = res?.data?.societies ?? res?.data ?? [];
-        if (mounted) setSocieties(data);
-      } catch (err) {
-        console.error('Failed to fetch societies', err);
-        if (mounted) setError('Failed to fetch societies');
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    fetch();
-    return () => (mounted = false);
-  }, []);
+  const { data: societies = [], isLoading, isError } = useQuery({
+    queryKey: ["societies"],
+    queryFn: async () => {
+      const res = await api.get('/societyconnect/societies');
+      return res?.data?.societies ?? res?.data ?? [];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   const navigate = useNavigate();
 
@@ -44,10 +31,10 @@ function Explore() {
           <h2 className="text-2xl font-bold text-gray-900">Explore Societies</h2>
         </div>
 
-        {loading ? (
+        {isLoading ? (
           <div className="text-center py-12">Loading societies…</div>
-        ) : error ? (
-          <div className="text-center py-12 text-red-500">{error}</div>
+        ) : isError ? (
+          <div className="text-center py-12 text-red-500">Failed to fetch societies</div>
         ) : societies.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-lg shadow-md mt-6 border border-gray-200">
             <ShoppingCart className="h-16 w-16 mb-4 text-gray-400" />

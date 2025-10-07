@@ -1,43 +1,28 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import api from "../../api/interceptor";
 import PostsModal from "./PostsModal";
 
 function Feed() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [selectedPostId, setSelectedPostId] = useState(null);
 
-  useEffect(() => {
-    let mounted = true;
-    const fetchPosts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await api.get(`/societyconnect/posts`);
-        const data = res?.data?.posts ?? res?.data ?? [];
-        if (!mounted) return;
-        setPosts(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Failed to load posts", err);
-        if (mounted) setError("Failed to load posts");
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    fetchPosts();
-    return () => (mounted = false);
-  }, []);
+  const { data: posts = [], isLoading, isError } = useQuery({
+    queryKey: ["posts", "all"],
+    queryFn: async () => {
+      const res = await api.get(`/societyconnect/posts`);
+      return res?.data?.posts ?? res?.data ?? [];
+    },
+    staleTime: 1000 * 60 * 2,
+  });
 
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-gray-200 px-4 py-8 transition-colors duration-300">
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center items-center h-[60vh] text-gray-400 text-lg animate-pulse">
           Loading posts…
         </div>
-      ) : error ? (
-        <div className="text-red-500 text-center mt-10">{error}</div>
+      ) : isError ? (
+        <div className="text-red-500 text-center mt-10">Failed to load posts</div>
       ) : posts.length === 0 ? (
         <div className="flex justify-center items-center h-[60vh] text-gray-500 text-sm">
           No posts available.

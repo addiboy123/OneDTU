@@ -8,6 +8,7 @@ import OtherItemModal from "../components/hostelcart/OtherItemModal";
 import LoginPromptModal from "../components/hostelcart/LoginPromptModal";
 import getDecodedToken from "../lib/auth";
 import api from "../api/interceptor";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // derive auth from token in localStorage
 const isAuthenticated = () => Boolean(getDecodedToken());
@@ -36,71 +37,48 @@ const HostelCart = () => {
       setCurrentUser(null);
     }
   }, []);
+  // Use React Query to fetch and cache items so data persists between component switches
+  const queryClient = useQueryClient();
 
-  // fetch items depending on auth state
+  const myItemsQuery = useQuery({
+    queryKey: ["hostelcart", "myItems", currentUser?.userId],
+    queryFn: async () => {
+      const res = await api.get("/hostelcart/items/");
+      return res?.data?.items ?? [];
+    },
+    enabled: isAuth && !!currentUser?.userId,
+  });
+
+  const otherItemsQuery = useQuery({
+    queryKey: ["hostelcart", "otherItems", currentUser?.userId],
+    queryFn: async () => {
+      const res = await api.get("/hostelcart/items/others");
+      return res?.data?.items ?? [];
+    },
+    enabled: isAuth,
+  });
+
+  const publicItemsQuery = useQuery({
+    queryKey: ["hostelcart", "publicItems"],
+    queryFn: async () => {
+      const res = await api.get("/hostelcart/all-items");
+      return res?.data?.items ?? [];
+    },
+    enabled: !isAuth,
+  });
+
+  // Keep local states in sync with query data for components expecting arrays
   useEffect(() => {
-    let mounted = true;
+    if (myItemsQuery.data) setUserItems(myItemsQuery.data);
+  }, [myItemsQuery.data]);
 
-  const fetchItems = async () => {
-      try {
+  useEffect(() => {
     if (isAuth) {
-      const decoded = currentUser ?? getDecodedToken();
-      if (!decoded?.userId) {
-      setUserItems([]);
-      setOtherItems([]);
-      return;
-      }
-
-            // Fetch my items
-      try {
-      const myRes = await api.get('/hostelcart/items/');
-            if (mounted) {
-                setUserItems(myRes?.data?.success ? myRes.data.items : []);
-            }
-            } catch (err) {
-            console.error("Error fetching my items:", err.response?.data?.message || err.message || err);
-            if (mounted) setUserItems([]);
-            }
-
-            // Fetch other items
-      try {
-      const otherRes = await api.get('/hostelcart/items/others');
-            if (mounted) {
-                setOtherItems(otherRes?.data?.success ? otherRes.data.items : []);
-            }
-            } catch (err) {
-            console.error("Error fetching other items:", err.response?.data?.message || err.message || err);
-            if (mounted) setOtherItems([]);
-            }
-
-        } else {
-            // Unauthenticated users → fetch all items
-      try {
-      const res = await api.get(`/hostelcart/all-items`);
-            if (mounted) {
-                setOtherItems(res?.data?.success ? res.data.items : []);
-                setUserItems([]);
-            }
-            } catch (err) {
-            console.error("Error fetching all items:", err.response?.data?.message || err.message || err);
-            if (mounted) {
-                setOtherItems([]);
-                setUserItems([]);
-            }
-            }
-        }
-        } catch (err) {
-        console.error("Unexpected error:", err.message || err);
-        }
-
-    };
-
-    fetchItems();
-    return () => {
-      mounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser?.userId]);
+      if (otherItemsQuery.data) setOtherItems(otherItemsQuery.data);
+    } else {
+      if (publicItemsQuery.data) setOtherItems(publicItemsQuery.data);
+    }
+  }, [otherItemsQuery.data, publicItemsQuery.data, isAuth]);
 
   const handleSelectItem = (item, isUserItem) => {
     if (!isAuthenticated()) {
@@ -146,7 +124,15 @@ const HostelCart = () => {
       <AddItemModal
         isOpen={isAddItemModalOpen}
         onClose={() => setIsAddItemModalOpen(false)}
-        onItemAdded={(newItem) => setUserItems((prev) => [...prev, newItem])}
+        onItemAdded={(newItem) => {
+          // Update the cached myItems list so UI stays in sync across routes
+          queryClient.setQueryData(["hostelcart", "myItems", currentUser?.userId], (old = []) => [
+            ...old,
+            newItem,
+          ]);
+          // also update local state immediately for current view
+          setUserItems((prev) => [...prev, newItem]);
+        }}
       />
 
       {isCurrentUserItem ? (
