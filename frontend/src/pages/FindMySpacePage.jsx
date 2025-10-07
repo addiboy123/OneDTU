@@ -1,6 +1,7 @@
 // src/pages/FindMySpacePage.jsx
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/findmyspace/Sidebar";
 import PostGrid from "../components/findmyspace/PostGrid";
@@ -19,8 +20,6 @@ function FindMySpacePage() {
   const [activeTab, setActiveTab] = useState("FLAT");
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   // ✅ ADDED: State to handle opening a specific PG room from the sidebar
   const [initialRoom, setInitialRoom] = useState(null);
@@ -32,36 +31,32 @@ function FindMySpacePage() {
   const [editingPgPost, setEditingPgPost] = useState(null);
   const [currentPgId, setCurrentPgId] = useState(null);
 
-  // ✅ IMPROVED: fetchData now also refreshes the detail page if it's open
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = activeTab === "FLAT" ? await api.getAllFlats() : await api.getAllPGs();
-      const newPosts = activeTab === "FLAT" ? response.data.flats : response.data.pgs;
-      setPosts(newPosts);
+  // Use React Query to fetch flats / pgs depending on activeTab
+  const { data: rawData, isLoading, isError, refetch } = useQuery({
+    queryKey: ["findMySpace", activeTab],
+    queryFn: async () => {
+      return activeTab === "FLAT" ? await api.getAllFlats() : await api.getAllPGs();
+    },
+    staleTime: 1000 * 60 * 2,
+  });
 
-      // If a post is currently selected, find its updated version and refresh the state
-      if (selectedPost) {
-        const updatedSelectedPost = newPosts.find(p => p._id === selectedPost._id);
-        if (updatedSelectedPost) {
-          setSelectedPost(updatedSelectedPost);
-        } else {
-          // The post might have been deleted, so go back to the list
-          setSelectedPost(null);
-        }
-      }
-    } catch (err) {
-      setError(err.message || "Failed to fetch data.");
-      setPosts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [activeTab, selectedPost]);
-
+  // derive posts from the query response and keep selectedPost in sync
   useEffect(() => {
-    fetchData();
-  }, [activeTab]); // Run only when tab changes, fetchData will be called manually for other updates
+    const response = rawData;
+    const newPosts = response
+      ? activeTab === "FLAT"
+        ? response.data?.flats ?? []
+        : response.data?.pgs ?? []
+      : [];
+    setPosts(newPosts);
+
+    if (selectedPost) {
+      const updatedSelectedPost = newPosts.find((p) => p._id === selectedPost._id);
+      if (updatedSelectedPost) setSelectedPost(updatedSelectedPost);
+      else setSelectedPost(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawData, activeTab]);
 
   // --- Handlers ---
   const handleOpenFlatModal = (flat = null) => { setEditingFlat(flat); setIsFlatModalOpen(true); };
