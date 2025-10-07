@@ -1,83 +1,98 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "../../api/interceptor";
+import PostsModal from "./PostsModal";
 
 function Feed() {
-  const [selectedPost, setSelectedPost] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedPostId, setSelectedPostId] = useState(null);
 
-  // Static sample posts
-  const posts = [
-    {
-      _id: "p1",
-      image: "https://picsum.photos/seed/post1/800/600",
-      description: "Sunset photography walk organised by Photography Club.",
-      comments: [
-        { user: "Aisha", text: "Amazing shots!" },
-        { user: "Ravi", text: "Wish I could join next time." },
-      ],
-    },
-    {
-      _id: "p2",
-      image: "https://picsum.photos/seed/post2/800/600",
-      description: "Our coding society placed 2nd in the inter-college hackathon.",
-      comments: [{ user: "Priya", text: "Congrats team!" }],
-    },
-    {
-      _id: "p3",
-      image: "https://picsum.photos/seed/post3/800/600",
-      description: "Highlights from the drama circle's latest play.",
-      comments: [],
-    },
-  ];
+  useEffect(() => {
+    let mounted = true;
+    const fetchPosts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await api.get(`/societyconnect/posts`);
+        const data = res?.data?.posts ?? res?.data ?? [];
+        if (!mounted) return;
+        setPosts(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to load posts", err);
+        if (mounted) setError("Failed to load posts");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetchPosts();
+    return () => (mounted = false);
+  }, []);
 
   return (
-    <div>
-      <div className="grid grid-cols-3 gap-4">
-        {posts.map((post) => (
-          <div
-            key={post._id}
-            className="cursor-pointer relative group"
-            onClick={() => setSelectedPost(post)}
-          >
-            <img
-              src={post.image}
-              alt="post"
-              className="rounded-lg object-cover w-full h-60"
-            />
-          </div>
-        ))}
-      </div>
+    <div className="min-h-screen bg-[#0d0d0d] text-gray-200 px-4 py-8 transition-colors duration-300">
+      {loading ? (
+        <div className="flex justify-center items-center h-[60vh] text-gray-400 text-lg animate-pulse">
+          Loading posts…
+        </div>
+      ) : error ? (
+        <div className="text-red-500 text-center mt-10">{error}</div>
+      ) : posts.length === 0 ? (
+        <div className="flex justify-center items-center h-[60vh] text-gray-500 text-sm">
+          No posts available.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {posts.map((post) => {
+            const thumb =
+              Array.isArray(post.images) && post.images.length
+                ? post.images[0]
+                : post.image || "";
+            const societyName =
+              typeof post.society === "string"
+                ? post.society
+                : post.society?.name ?? "";
+            const title = post.title ?? "";
+            const desc = post.description ?? "";
+            const shortDesc =
+              desc.length > 100 ? desc.slice(0, 97) + "..." : desc;
 
-      <div className="flex justify-center mt-6">
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-          Load More
-        </button>
-      </div>
+            return (
+              <div
+                key={post._id}
+                onClick={() => setSelectedPostId(post._id)}
+                className="cursor-pointer group relative rounded-2xl overflow-hidden bg-neutral-900 shadow-lg shadow-black/30 hover:shadow-blue-600/10 transition-all duration-300 hover:-translate-y-1"
+              >
+                <img
+                  src={thumb}
+                  alt={title || "post"}
+                  className="w-full h-60 object-cover transform group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+                />
 
-      {/* Post Modal */}
-      {selectedPost && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-[600px] relative">
-            <button
-              className="absolute top-2 right-3 text-gray-500"
-              onClick={() => setSelectedPost(null)}
-            >
-              ×
-            </button>
-            <img
-              src={selectedPost.image}
-              alt="post"
-              className="rounded-lg mb-4 w-full"
-            />
-            <p className="text-gray-700 mb-3">{selectedPost.description}</p>
+                {/* Overlay (untouched per request) */}
+                <div className="absolute left-0 right-0 bottom-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent text-white p-3">
+                  <div className="text-xs uppercase tracking-wider text-blue-300 font-medium">
+                    {societyName}
+                  </div>
+                  <div className="font-semibold text-sm mt-1">{title}</div>
+                  <div className="text-xs text-gray-200 mt-1">{shortDesc}</div>
+                </div>
 
-            <h4 className="font-semibold text-gray-800 mb-2">Comments</h4>
-            {selectedPost.comments?.map((c, i) => (
-              <p key={i} className="text-gray-600 mb-1">
-                <b>{c.user}</b>: {c.text}
-              </p>
-            ))}
-          </div>
+                {/* Hover glow border effect */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-transparent to-black/30 rounded-2xl pointer-events-none" />
+              </div>
+            );
+          })}
         </div>
       )}
+
+      {/* Modal */}
+      <PostsModal
+        postId={selectedPostId}
+        isOpen={Boolean(selectedPostId)}
+        onClose={() => setSelectedPostId(null)}
+      />
     </div>
   );
 }
