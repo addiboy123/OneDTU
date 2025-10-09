@@ -8,6 +8,8 @@ import Profile from "./pages/Profile";
 import SocietyConnect from "./pages/Societyconnect";
 import Society from "./pages/Society";
 import FindMySpace from "./pages/FindMySpacePage";
+import DtuNav from "./pages/DtuNav";
+
 import './index.css'; 
 
 const queryClient = new QueryClient({
@@ -22,20 +24,20 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/hostelcart" element={<HostelCart />} />
-          <Route path="/societyconnect" element={<SocietyConnect />} />
-          <Route path="/societyconnect/:name" element={<Society />} />
-          <Route path="/findmyspace" element={<FindMySpace />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/hostelcart" element={<HostelCart />} />
+        <Route path="/societyconnect" element={<SocietyConnect />} />
+        <Route path="/societyconnect/:name" element={<Society />} />
+        <Route path="/findmyspace" element={<FindMySpace />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/dtunavigate" element={<DtuNav />} />
+
+      </Routes>
+    </BrowserRouter>
   );
 }
 
