@@ -23,7 +23,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Copy files to server and restart services
+      - name: Pull files to server and restart services
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
