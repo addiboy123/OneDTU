@@ -1,7 +1,11 @@
+
+
 name: 🚀 Deploy OneDTU
 
+# This pipeline triggers only when a pull request targeting the 'main' branch is closed and merged.
 on:
-  push:
+  pull_request:
+    types: [closed]
     branches:
       - main
 
@@ -14,35 +18,43 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      # 🏗️ Build and deploy frontend + restart backend
-      - name: Build and deploy frontend + restart backend
-        uses: appleboy/ssh-action@v1.2.0
+      # This step connects to your server via SSH and runs the deployment script.
+      - name: Build and Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
+            # Exit immediately if a command exits with a non-zero status.
             set -e
+
+            # Source NVM to make node and npm available
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-            echo "🔄 Pulling latest code"
+            
+            echo "🔄 Navigating to project directory and pulling latest code..."
             cd ~/OneDTU
             git pull origin main
 
-            echo "🏗️ Building frontend"
-            cd frontend
+            echo "🚀 Installing backend dependencies and restarting..."
+            cd backend
+            npm install
+            # This command will restart the process if it exists, or start it if it doesn't.
+            pm2 restart backend || pm2 start index.js --name backend
+            pm2 save # Saves the current process list
+
+            echo "🏗️ Building the frontend..."
+            cd ../frontend
             npm install
             npm run build
-            sudo cp -r dist/* /var/www/onedtu
 
-            echo "🚀 Restarting backend"
-            cd ../backend
-            npm install
-            pm2 restart backend
-            echo "✅ Deployment complete"
+            echo "📂 Deploying frontend to Nginx directory..."
+            # Clean the destination directory before copying new files
+            sudo rm -rf /var/www/myapp/*
+            sudo cp -r dist/* /var/www/myapp/
+
+            echo "🔁 Restarting Nginx to apply changes..."
+            sudo systemctl restart nginx
+
+            echo "✅ Deployment complete!"
