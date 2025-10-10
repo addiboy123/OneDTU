@@ -1,9 +1,10 @@
-
-
 name: 🚀 Deploy OneDTU
 
-# This pipeline triggers only when a pull request targeting the 'main' branch is closed and merged.
+# Trigger on direct pushes to main OR pull request closed events targeting main
 on:
+  push:
+    branches:
+      - main
   pull_request:
     types: [closed]
     branches:
@@ -11,7 +12,8 @@ on:
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true || github.event_name == 'push'
+    # Run when it's a push OR when a pull request targeting main was merged (closed + merged)
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
 
     steps:
