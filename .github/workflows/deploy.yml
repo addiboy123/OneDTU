@@ -1,6 +1,5 @@
-name: 🚀 Deploy OneDTU
+name: Deploy to Server
 
-# Trigger on direct pushes to main OR pull request closed events targeting main
 on:
   push:
     branches:
@@ -12,51 +11,35 @@ on:
 
 jobs:
   deploy:
-    # Run when it's a push OR when a pull request targeting main was merged (closed + merged)
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    if: github.event.pull_request.merged == true || github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # This step connects to your server via SSH and runs the deployment script.
-      - name: Build and Deploy to Server
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Copy files to server and restart services
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Exit immediately if a command exits with a non-zero status.
             set -e
 
-            # Source NVM to make node and npm available
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            
-            echo "🔄 Navigating to project directory and pulling latest code..."
-            cd ~/OneDTU
+            cd /home/spacemarine/OneDTU
             git pull origin main
-
-            echo "🚀 Installing backend dependencies and restarting..."
-            cd backend
-            npm install
-            # This command will restart the process if it exists, or start it if it doesn't.
-            pm2 restart backend || pm2 start index.js --name backend
-            pm2 save # Saves the current process list
-
-            echo "🏗️ Building the frontend..."
-            cd ../frontend
-            npm install
+            cd frontend
+            npm ci
             npm run build
-
-            echo "📂 Deploying frontend to Nginx directory..."
-            # Clean the destination directory before copying new files
             sudo rm -rf /var/www/myapp/*
             sudo cp -r dist/* /var/www/myapp/
-
-            echo "🔁 Restarting Nginx to apply changes..."
             sudo systemctl restart nginx
-
-            echo "✅ Deployment complete!"
+            pm2 restart backend
