@@ -19,32 +19,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js for CI build
+      # 2️⃣ Setup Node.js to run sanity build on GitHub
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "npm"
 
-      # 3️⃣ Build frontend on GitHub (not on the server)
-      - name: Build frontend
+      # 3️⃣ Run sanity check build (to catch build-time errors early)
+      - name: Sanity check frontend build
         working-directory: ./frontend
         run: |
           npm ci
           npm run build
 
-      # 4️⃣ Upload the built frontend to a temp directory on server
-      - name: Upload built frontend to server
+      # 4️⃣ Deploy source code to server (NOT the dist build)
+      - name: Upload source code to server
         uses: appleboy/scp-action@v0.1.5
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          source: "frontend/dist/."
-          target: "/home/spacemarine/tmp_frontend/"
+          source: "."
+          target: "/home/spacemarine/OneDTU"
+          rm: true
 
-      # 5️⃣ Move build to /var/www/myapp with sudo + restart services
-      - name: Update backend and restart services
+      # 5️⃣ Build frontend + restart backend on the server
+      - name: Build frontend & restart services
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -56,7 +57,7 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            echo "=== Updating backend ==="
+            echo "=== Updating repo ==="
             cd /home/spacemarine/OneDTU
             git pull origin main
 
@@ -65,10 +66,15 @@ jobs:
             npm ci --omit=dev || true
             cd ..
 
-            echo "=== Deploying frontend ==="
+            echo "=== Building frontend on server (with correct .env) ==="
+            cd frontend
+            npm ci
+            npm run build
+            cd ..
+
+            echo "=== Deploying built frontend ==="
             sudo rm -rf /var/www/myapp/*
-            sudo cp -r /home/spacemarine/tmp_frontend/* /var/www/myapp/
-            sudo rm -rf /home/spacemarine/tmp_frontend/*
+            sudo cp -r frontend/dist/* /var/www/myapp/
 
             echo "=== Restarting services ==="
             pm2 restart all || true
