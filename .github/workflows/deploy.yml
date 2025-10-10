@@ -33,7 +33,7 @@ jobs:
           npm ci
           npm run build
 
-      # 4️⃣ Upload the built frontend to the server
+      # 4️⃣ Upload the built frontend to a temp directory on server
       - name: Upload built frontend to server
         uses: appleboy/scp-action@v0.1.5
         with:
@@ -41,9 +41,9 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
           source: "frontend/dist/*"
-          target: "/var/www/myapp/"
+          target: "/home/spacemarine/tmp_frontend/"
 
-      # 5️⃣ Update backend and restart services on the server
+      # 5️⃣ Move build to /var/www/myapp with sudo + restart services
       - name: Update backend and restart services
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -52,16 +52,21 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script_stop: true
           script: |
-            echo "=== Pulling latest backend changes ==="
+            echo "=== Updating backend ==="
             cd /home/spacemarine/OneDTU
             git pull origin main
 
             echo "=== Installing backend dependencies ==="
             cd backend
             npm ci --omit=dev || true
-
-            echo "=== Restarting backend and nginx ==="
             cd ..
+
+            echo "=== Deploying frontend ==="
+            sudo rm -rf /var/www/myapp/*
+            sudo cp -r /home/spacemarine/tmp_frontend/* /var/www/myapp/
+            sudo rm -rf /home/spacemarine/tmp_frontend/*
+
+            echo "=== Restarting services ==="
             pm2 restart all || true
             sudo systemctl restart nginx
 
