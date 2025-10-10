@@ -24,20 +24,22 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/hostelcart" element={<HostelCart />} />
-        <Route path="/societyconnect" element={<SocietyConnect />} />
-        <Route path="/societyconnect/:name" element={<Society />} />
-        <Route path="/findmyspace" element={<FindMySpace />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/dtunavigate" element={<DtuNav />} />
-
-      </Routes>
-    </BrowserRouter>
+    // ✅ Wrap everything inside QueryClientProvider
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/hostelcart" element={<HostelCart />} />
+          <Route path="/societyconnect" element={<SocietyConnect />} />
+          <Route path="/societyconnect/:name" element={<Society />} />
+          <Route path="/findmyspace" element={<FindMySpace />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/dtunavigate" element={<DtuNav />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
