@@ -1,83 +1,47 @@
-name: Deploy to Server
+name: 🚀 Deploy OneDTU
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [closed]
-    branches:
-      - main
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true || github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup Node.js to run sanity build on GitHub
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "npm"
+          node-version: 22
 
-      # 3️⃣ Run sanity check build (to catch build-time errors early)
-      - name: Sanity check frontend build
-        working-directory: ./frontend
-        run: |
-          npm ci
-          npm run build
-
-      # 4️⃣ Deploy source code to server (NOT the dist build)
-      - name: Upload source code to server
-        uses: appleboy/scp-action@v0.1.5
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          source: "."
-          target: "/home/spacemarine/OneDTU"
-          rm: true
-
-      # 5️⃣ Build frontend + restart backend on the server
-      - name: Build frontend & restart services
+      # 🏗️ Build and deploy frontend + restart backend
+      - name: Build and deploy frontend + restart backend
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
-          script_stop: true
           script: |
             set -e
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-            echo "=== Updating repo ==="
-            cd /home/spacemarine/OneDTU
+            echo "🔄 Pulling latest code"
+            cd ~/OneDTU
             git pull origin main
 
-            echo "=== Installing backend dependencies ==="
-            cd backend
-            npm ci --omit=dev || true
-            cd ..
-
-            echo "=== Building frontend on server (with correct .env) ==="
+            echo "🏗️ Building frontend"
             cd frontend
-            npm ci
+            npm install
             npm run build
-            cd ..
+            sudo cp -r dist/* /var/www/onedtu
 
-            echo "=== Deploying built frontend ==="
-            sudo rm -rf /var/www/myapp/*
-            sudo cp -r frontend/dist/* /var/www/myapp/
-
-            echo "=== Restarting services ==="
-            pm2 restart all || true
-            sudo systemctl restart nginx
-
-            echo "✅ Deployment complete!"
+            echo "🚀 Restarting backend"
+            cd ../backend
+            npm install
+            pm2 restart backend
+            echo "✅ Deployment complete"
