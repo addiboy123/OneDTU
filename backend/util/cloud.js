@@ -40,7 +40,7 @@ const uploadImage = async (fileBuffer) => {
                         console.error("Cloudinary upload error:", error);
                         reject(error);
                     } else {
-                        console.log("Uploaded image");
+                        // console.log("Uploaded image");
                         resolve(result);
                     }
                 }

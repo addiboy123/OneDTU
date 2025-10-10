@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { BadRequestError, UnauthenticatedError } = require('../../errors');
 
 exports.login = async (req, res) => {
-    console.log("Society admin login attempt");
+    // console.log("Society admin login attempt");
     const { phoneNumber, password } = req.body;
     if (!phoneNumber || !password) {
         throw new BadRequestError('phoneNumber and password are required');

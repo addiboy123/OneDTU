@@ -181,7 +181,7 @@ exports.getItemsByCategory = async (req,res) =>{
 
 
 exports.updateItem = async (req, res) => {
-    console.log("update endpoint hit")
+    // console.log("update endpoint hit")
     try {
         const { itemId, itemName, itemDescription, itemPrice, deletedImages } = req.body;
         const userId = req.user && req.user.userId;

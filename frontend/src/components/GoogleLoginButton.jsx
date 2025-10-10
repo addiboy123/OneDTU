@@ -14,7 +14,7 @@ function GoogleLoginButton() {
         return;
       }
       const data = await googleLogin(cred);
-      console.log("Google Auth Response:", data);
+      // console.log("Google Auth Response:", data);
       if (data?.token){
         localStorage.setItem("token", data.token);
         // notify other components that auth state changed

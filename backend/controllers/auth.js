@@ -8,7 +8,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const googleLogin = async (req, res) => {
   // accept multiple names from client
-  console.log('Incoming google login body:', req.body);
+  // console.log('Incoming google login body:', req.body);
   const token = req.body.token || req.body.credential || req.body.id_token;
   if (!token) return res.status(401).json({ msg: 'No Google token provided' });
 
@@ -49,7 +49,7 @@ const googleLogin = async (req, res) => {
       token: customToken,
     });
   } catch (error) {
-    console.error('Google token verify error:', error && error.message ? error.message : error);
+    // console.error('Google token verify error:', error && error.message ? error.message : error);
     return res.status(401).json({ msg: 'Invalid Google token', error: error.message || error });
   }
 };
@@ -72,7 +72,7 @@ const register = async (req, res) => {
   res.status(StatusCodes.CREATED).json({ user: { name , _id: user._id }, token });
 }
 const login = async (req, res) => {
-  console.log("Login attempt");
+  // console.log("Login attempt");
   const { email, password } = req.body;
   if (!email || !password) {
     throw new BadRequestError('Please provide email and Password');

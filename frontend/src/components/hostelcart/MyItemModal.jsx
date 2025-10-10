@@ -72,7 +72,7 @@ export function MyItemModal({ isOpen, onClose, item, onUpdateItem, onDeleteItem 
       const response = await api.patch("/hostelcart/items", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      console.log("Updated item:", response.data.message);
+      // console.log("Updated item:", response.data.message);
       onUpdateItem(response.data.item)
       setIsEditing(false)
       setDeletedImages([])

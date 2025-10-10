@@ -10,7 +10,7 @@ function Login() {
   const { login } = useAuth();
   const handleLogin = async (data) => {
     const res = await login(data);
-    console.log("Login Response:", res);
+    // console.log("Login Response:", res);
     if (res.token) {
       navigate("/");
     }

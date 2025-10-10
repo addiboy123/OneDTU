@@ -11,7 +11,7 @@ function Signup() {
   const { signup } = useAuth();
   const handleSignup = async (data) => {
     const res = await signup(data);
-    console.log("Signup Response:", res);
+    // console.log("Signup Response:", res);
     if (res.token) {
       navigate("/");
     }
