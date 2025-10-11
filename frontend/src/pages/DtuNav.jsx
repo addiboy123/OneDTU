@@ -129,7 +129,7 @@ export default function DtuNav() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ backgroundColor: "#FFFFFF" }}
+      style={{ backgroundColor: "#ff7300ff" }}
     >
       {/* Navbar */}
       <Navbar />
