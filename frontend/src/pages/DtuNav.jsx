@@ -7,27 +7,27 @@ import React, { useRef, useEffect } from "react";
 const cardData = [
   {
     title: "Academics",
-    imageUrl: "https://placehold.co/400x400/0D1B2A/FFFFFF?text=Academics",
+    imageUrl: "https://dtu.ac.in/modules/dtutimes/times/images/gallery/codtu/25.jpg",
     link: "https://dtu.ac.in/Web/Academics/academic_calender.php",
   },
   {
-    title: "Admissions",
-    imageUrl: "https://placehold.co/400x400/0D1B2A/FFFFFF?text=Admissions",
-    link: "https://dtu.ac.in/Web/ERP/about/admission.php",
+    title: "Results",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJucN7Q9cPOe1wqTTlo48fVJxF3_2ldc9_xg&s",
+    link: "https://exam.dtu.ac.in/result.htm",
   },
   {
     title: "Examinations",
-    imageUrl: "https://placehold.co/400x400/0D1B2A/FFFFFF?text=Exams",
-    link: "https://exam.dtu.ac.in/",
+    imageUrl: "https://i.postimg.cc/3r4L9FnL/Gemini-Generated-Image-54cyh054cyh054cy-2.png",
+    link: "https://exam.dtu.ac.in/DateSheet.htm",
   },
   {
-    title: "DTU Times",
-    imageUrl: "https://placehold.co/400x400/0D1B2A/FFFFFF?text=News",
-    link: "https://dtutimes.com/",
+    title: "Registration",
+    imageUrl: "https://i.postimg.cc/WbQcX4GJ/Screenshot-2025-10-11-at-16-29-09.png",
+    link: "https://reg.exam.dtu.ac.in/student/login",
   },
   {
     title: "Library Portal",
-    imageUrl: "https://placehold.co/400x400/0D1B2A/FFFFFF?text=Library",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWGX5VqJy4PCrTnlbpwtmj_RClmM3kUZmjXQ&s",
     link: "https://library.dtu.ac.in/",
   },
 ];
