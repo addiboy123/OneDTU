@@ -34,49 +34,6 @@ jobs:
 
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            cd /home/spacemarine/OneDTU
-            git pull origin main
-            cd frontend
-            npm ci
-            npm run build
-            sudo rm -rf /var/www/myapp/*
-            sudo cp -r dist/* /var/www/myapp/
-            sudo systemctl rname: Deploy to Server
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [closed]
-    branches:
-      - main
-
-jobs:
-  deploy:
-    if: github.event.pull_request.merged == true || github.event_name == 'push'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Pull files to server and restart services
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_KEY }}
-          script: |
-            set -e
-
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
             echo "🔄 Pulling latest code"
             cd /home/spacemarine/OneDTU
