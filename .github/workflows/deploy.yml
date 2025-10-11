@@ -22,6 +22,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          
+      - name: Build frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+
 
       - name: Pull files to server and restart services
         uses: appleboy/ssh-action@v1.2.0
@@ -34,12 +41,26 @@ jobs:
 
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            echo "🔄 Pulling latest code"
             cd /home/spacemarine/OneDTU
             git pull origin main
-            cd frontend
-            npm ci
+
+            echo "🚀 Installing backend dependencies and restarting PM2"
+            cd backend
+            npm install
+            pm2 restart backend || pm2 start index.js --name backend
+            pm2 save
+
+            echo "⚙️ Building frontend"
+            cd ../frontend
+            npm install
             npm run build
+
+            echo "📂 Deploying frontend to Nginx directory"
             sudo rm -rf /var/www/myapp/*
             sudo cp -r dist/* /var/www/myapp/
+
+            echo "🔁 Restarting Nginx"
             sudo systemctl restart nginx
-            pm2 restart backend
+
+            echo "✅ Deployment complete"
