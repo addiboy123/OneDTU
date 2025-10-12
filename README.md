@@ -113,7 +113,7 @@ We welcome contributions from all skill levels. Follow these simple steps:
    - Go to your fork on GitHub and click “Compare & Pull Request”.
    - Describe your changes and submit the PR for review.
 
-8. **Discuss and Improve
+8. **Discuss and Improve**
    - Respond to feedback from maintainers.
    - Make additional commits if necessary
 
@@ -144,3 +144,23 @@ npm install
 # 6️⃣ Start the frontend development server
 npm run dev
 ```
+---
+
+## 🖼️ Screenshots
+
+Here are some screenshots of **OneDTU** in action:
+### 🏠 Homepage
+![Homepage](https://i.postimg.cc/NMF4Yhyj/Screenshot-2025-10-12-at-11-42-31.png)
+
+### 🏠 Hostel Cart
+![Hostel Cart](https://i.postimg.cc/63q0ws70/Screenshot-2025-10-12-at-11-42-44.png)
+
+### 🧍‍♂️ FindMySpace
+![FindMySpace](https://i.postimg.cc/9M0pV34P/Screenshot-2025-10-12-at-11-42-51.png)
+
+### 🏛️ Society Connect
+![Society Connect](https://i.postimg.cc/W3znjRDr/Screenshot-2025-10-12-at-11-42-58.png)
+
+### 🗺️ DTU Navigate
+![DTU Navigate](https://i.postimg.cc/0Qjfxg6Z/Screenshot-2025-10-12-at-11-43-14.png)
+
