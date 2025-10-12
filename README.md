@@ -85,7 +85,7 @@ We welcome contributions from all skill levels. Follow these simple steps:
    
 2. **Clone Your Fork**  
    ```bash
-   git clone https://github.com/your-username/OneDTU.git
+   git clone https://github.com/addiboy123/OneDTU.git
    cd OneDTU
    ```
    
