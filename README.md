@@ -31,30 +31,91 @@ To build a unified portal that enhances student convenience and connectivity by 
 ## 🚀 Core Features
 
 ### 🏠 Hostel Cart  
-Buy or sell hostel and PG/flat items easily between juniors and seniors.  
-Create listings, browse available products, and chat directly with sellers.
+- Buy or sell hostel and PG/flat items easily between juniors and seniors.  
+- Create listings, browse available products, and chat directly with sellers.
 
 ### 🧍‍♂️ FindMySpace  
-Search and connect with potential **flatmates, PG-mates**, or find available **PGs/flats** around DTU.  
-Filter based on location, price, and preferences.
+- Search and connect with potential **flatmates, PG-mates**, or find available **PGs/flats** around DTU.  
 
 ### 🏛️ Society Connect  
-Explore all active **DTU societies**, view their profiles, and stay updated with the latest announcements and recruitment drives.
+- Explore all active **DTU societies**, view their profiles, and stay updated with the latest announcements and recruitment drives.
 
 ### 🗺️ DTU Navigate  
-Find your way through **important DTU web portals** and official resources — no more digging through multiple links.
+- Find your way through **important DTU web portals** and official resources — no more digging through multiple links.
 
 ---
 
 ## 🧩 Tech Stack
 
-| Category | Technologies Used |
-|-----------|-------------------|
-| **Frontend** | React.js, HTML5, CSS3, JavaScript |
-| **Backend** | Node.js, Express.js |
-| **Database** | MongoDB Atlas |
-| **Deployment** | Microsoft Azure Services |
-| **Version Control** | Git & GitHub |
+| Category          | Technologies Used                 |
+|------------------|----------------------------------|
+| **Frontend**      | React.js, Tailwind CSS, JavaScript |
+| **Backend**       | Node.js, Express.js               |
+| **Database**      | MongoDB Atlas                     |
+| **Deployment**    | Microsoft Azure Services          |
+| **Version Control** | Git & GitHub                     |
+
+---
+
+## 💡 Open Source Inspiration
+
+**OneDTU** is fully open-source, and we warmly invite juniors and fellow students to contribute!  
+
+### 🌱 Why Contribute?
+- Gain **real-world experience** in MERN stack development.  
+- Learn **best practices in collaborative coding**, version control, and project management.  
+- Strengthen your **portfolio** with tangible contributions visible on GitHub.  
+- **Give back** to the community by enhancing a platform that helps your peers.  
+
+### 🤝 How You Can Help
+- Fix bugs, improve UI/UX, and add new features.  
+- Write documentation or tutorials for easier onboarding.  
+- Participate in discussions, suggest improvements, and review pull requests.  
+
+Every contribution, no matter how small, **makes OneDTU better for the DTU community** and helps you grow as a developer. Dive in, explore, and start contributing today!
+
+---
+
+## 🤓 How to Contribute
+
+We welcome contributions from all skill levels. Follow these simple steps:
+
+1. **Fork the Repository**  
+   Click the “Fork” button on GitHub to create your copy of the project.
+   
+2. **Clone Your Fork**  
+   ```bash
+   git clone https://github.com/your-username/OneDTU.git
+   cd OneDTU
+   ```
+   
+3. **Create a New Branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+   
+4. **Make Your Changes**
+   - Fix bugs, add features, or improve documentation.
+   - Ensure your code follows the existing style and conventions.
+         
+5. **Commit Your Changes**
+   ```bash
+   git add .
+   git commit -m "Add: your feature or fix description"
+   ```
+   
+6. **Push to Your Branch**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+7. **Open a Pull Request**
+   - Go to your fork on GitHub and click “Compare & Pull Request”.
+   - Describe your changes and submit the PR for review.
+
+8. **Discuss and Improve
+   - Respond to feedback from maintainers.
+   - Make additional commits if necessary
 
 ---
 
@@ -63,15 +124,23 @@ Find your way through **important DTU web portals** and official resources — n
 To run this project locally:
 
 ```bash
-# Clone the repository
+# 1️⃣ Clone the repository
 git clone https://github.com/addiboy123/OneDTU.git
 
-# Navigate to project folder
+# 2️⃣ Navigate into the project folder
 cd OneDTU
 
-# Install dependencies for both frontend and backend
+# 3️⃣ Install dependencies for backend
+cd backend
 npm install
-cd client && npm install
 
-# Start the development server
+# 4️⃣ Run the backend server
+npm start
+
+# 5️⃣ Open a new terminal window for frontend
+cd ../frontend
+npm install
+
+# 6️⃣ Start the frontend development server
 npm run dev
+```
