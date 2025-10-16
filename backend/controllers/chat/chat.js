@@ -1,6 +1,13 @@
 // controllers/chatController.js
-const Chat = require("../models/chat");
-const User = require("../models/user"); // Adjust if your user model file name differs
+
+// Safe model loader to support both CJS and ESM-style exports
+const loadModel = (path) => {
+  const mod = require(path);
+  return mod?.Chat || mod?.default || mod;
+};
+
+const Chat = loadModel("../../models/Chat/chat.model");
+const User = require("../../models/User.js");
 
 
 // @desc    Access or create a chat between two users
@@ -22,11 +29,11 @@ exports.accessChat = async (req, res) => {
     }
 
     let chat = await Chat.findOne({
-      users: { $all: [currentUser._id, receivingUser._id] },
-      $expr: { $eq: [ { $size: "$users" }, 2 ] }
+      members: { $all: [currentUser._id, receivingUser._id] },
+      $expr: { $eq: [ { $size: "$members" }, 2 ] }
     })
-      .populate("users", "-password")
-      .populate("latestMessage");
+      .populate("members", "name profile_photo_url phoneNumber")
+      .populate({ path: 'lastMessage', populate: { path: 'senderId', select: 'name profile_photo_url _id' } });
 
     if (chat) {
       return res.status(200).json(chat);
@@ -34,10 +41,11 @@ exports.accessChat = async (req, res) => {
 
     // Create new chat if it doesn't exist
     const newChat = await Chat.create({
-      users: [currentUser._id, receivingUser._id],
+      chatType: 'private',
+      members: [currentUser._id, receivingUser._id],
     });
 
-    const fullChat = await Chat.findById(newChat._id).populate("users", "-password");
+    const fullChat = await Chat.findById(newChat._id).populate("members", "name profile_photo_url phoneNumber");
     return res.status(201).json(fullChat);
 
   } catch (error) {
@@ -58,13 +66,13 @@ exports.fetchUserChats = async (req, res) => {
   }
 
   try {
-    const chats = await Chat.find({ users: userId })
-      .populate("users", "fullName profile_photo_url phoneNumber")
+    const chats = await Chat.find({ members: userId })
+      .populate("members", "name profile_photo_url phoneNumber")
       .populate({
-        path: "latestMessage",
+        path: "lastMessage",
         populate: {
-          path: "sender",
-          select: "fullName profile_photo_url"
+          path: "senderId",
+          select: "name profile_photo_url"
         }
       })
       .sort({ updatedAt: -1 });
