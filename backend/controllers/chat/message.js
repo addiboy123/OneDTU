@@ -1,4 +1,3 @@
-// Safe model loader to support both CJS and ESM-style exports
 const loadModel = (path) => {
   const mod = require(path);
   return mod?.Message || mod?.Chat || mod?.default || mod;
