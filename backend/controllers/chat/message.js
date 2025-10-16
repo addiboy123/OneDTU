@@ -1,23 +1,28 @@
-const Message = require("../models/message");
-const Chat = require("../models/chat");
+// Safe model loader to support both CJS and ESM-style exports
+const loadModel = (path) => {
+  const mod = require(path);
+  return mod?.Message || mod?.Chat || mod?.default || mod;
+};
+
+const Message = loadModel("../../models/Chat/message.model");
+const Chat = loadModel("../../models/Chat/chat.model");
 
 // Fetch all messages from a chat (GET /api/v1/message/:chatId)
 exports.getAllMessages = async (req, res) => {
   try {
     const chatId = req.params.chatId;
-    console.log("getAllMessages called with chatId:", chatId);
-    // Optional: Check if chat exists
+    if (!chatId) return res.status(400).json({ message: "chatId required" });
+
+    // Check chat exists
     const chatExists = await Chat.exists({ _id: chatId });
-    if (!chatExists) {
-      return res.status(404).json({ message: "Chat not found" });
-    }
+    if (!chatExists) return res.status(404).json({ message: "Chat not found" });
 
-    const messages = await Message.find({ chat: chatId })
-      .populate("sender", "fullName _id")
-      .populate("chat")
-      .sort({ createdAt: 1 }); // sort chronologically
+    // Messages reference `chatId` and `senderId` per model
+    const messages = await Message.find({ chatId })
+      .populate("senderId", "name profile_photo_url _id")
+      .sort({ createdAt: 1 });
 
-    res.status(200).json(messages);
+    res.status(200).json({ messages });
   } catch (error) {
     console.error("Error fetching messages:", error);
     res.status(500).send("Internal server error");
@@ -26,40 +31,36 @@ exports.getAllMessages = async (req, res) => {
 
 // Send a new message (POST /api/v1/message/)
 exports.sendMessage = async (req, res) => {
-  const { content, chatId, senderId } = req.body;
+  const { chatId, senderType, senderId, messageType, messageText, attachmentUrl } = req.body;
 
-  console.log("sendMessage called with body:", req.body);
-
-
-  if (!content || !chatId || !senderId) {
-    return res.status(400).send("Missing required fields");
+  if (!chatId || !senderType || (senderType === 'user' && !senderId) || !messageType) {
+    return res.status(400).json({ message: 'Missing required fields' });
   }
 
   try {
-    // Optional: validate chat existence
     const chat = await Chat.findById(chatId);
-    if (!chat) {
-      return res.status(404).json({ message: "Chat not found" });
-    }
+    if (!chat) return res.status(404).json({ message: 'Chat not found' });
 
-    let newMessage = await Message.create({
-      sender: senderId,
-      content,
-      chat: chatId,
-    });
+    const payload = { chatId, senderType, senderId, messageType };
+    if (messageType === 'text') payload.messageText = messageText;
+    else payload.attachmentUrl = attachmentUrl;
 
-    // Populate sender and chat fields
-    newMessage = await newMessage.populate("sender", "fullName _id");
-    newMessage = await newMessage.populate("chat");
+    let newMessage = await Message.create(payload);
 
-    // Update latest message in chat
-    chat.latestMessage = newMessage._id;
+    // push message into chat.messages and update lastMessage/lastMessageAt
+    chat.messages = chat.messages || [];
+    chat.messages.push(newMessage._id);
+    chat.lastMessage = newMessage._id;
+    chat.lastMessageAt = newMessage.createdAt || new Date();
     await chat.save();
 
-    res.status(201).json(newMessage);
+    // populate senderId if present
+    newMessage = await Message.findById(newMessage._id).populate('senderId', 'name profile_photo_url _id');
+
+    res.status(201).json({ message: newMessage });
   } catch (error) {
-    console.error("Error sending message:", error);
-    res.status(500).send("Internal server error");
+    console.error('Error sending message:', error);
+    res.status(500).send('Internal server error');
   }
 };
 
@@ -68,26 +69,17 @@ exports.markMessagesAsRead = async (req, res) => {
   const { chatId } = req.params;
   const { userId } = req.body;
 
-  if (!chatId || !userId) {
-    return res.status(400).json({ error: "chatId and userId are required" });
-  }
+  if (!chatId || !userId) return res.status(400).json({ error: 'chatId and userId are required' });
 
   try {
     const result = await Message.updateMany(
-      {
-        chat: chatId,
-        sender: { $ne: userId },
-        isRead: false,
-      },
+      { chatId, senderId: { $ne: userId }, isRead: false },
       { $set: { isRead: true } }
     );
 
-    res.status(200).json({
-      success: true,
-      updatedCount: result.modifiedCount,
-    });
+    res.status(200).json({ success: true, updatedCount: result.modifiedCount ?? result.nModified ?? 0 });
   } catch (err) {
-    console.error("Failed to mark messages as read:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Failed to mark messages as read:', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
