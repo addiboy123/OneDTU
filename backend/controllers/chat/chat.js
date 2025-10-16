@@ -14,14 +14,15 @@ const User = require("../../models/User.js");
 // @route   GET /api/chat/access
 // @access  Private
 exports.accessChat = async (req, res) => {
-  const { phoneNumberCurrentUser, phoneNumberOfReceivingUser } = req.query;
-  console.log("Accessing chat with phone numbers:", phoneNumberCurrentUser, phoneNumberOfReceivingUser);
-  if (!phoneNumberCurrentUser || !phoneNumberOfReceivingUser) {
-    return res.status(400).json({ message: "Both phone numbers are required" });
+  // authenticated user available on req.user (set by authentication middleware)
+  const authUserId = req.user?.userId;
+  const { phoneNumberOfReceivingUser } = req.query;
+  if (!authUserId || !phoneNumberOfReceivingUser) {
+    return res.status(400).json({ message: 'Missing required parameters' });
   }
 
   try {
-    const currentUser = await User.findOne({ phoneNumber: phoneNumberCurrentUser });
+    const currentUser = await User.findById(authUserId);
     const receivingUser = await User.findOne({ phoneNumber: phoneNumberOfReceivingUser });
 
     if (!currentUser || !receivingUser) {
@@ -59,14 +60,11 @@ exports.accessChat = async (req, res) => {
 // @route   GET /api/chat
 // @access  Private
 exports.fetchUserChats = async (req, res) => {
-  const { userId } = req.query;
-  console.log("Fetching chats for userId:", userId);
-  if (!userId) {
-    return res.status(400).json({ message: "userId query parameter is required" });
-  }
+  const authUserId = req.user?.userId;
+  if (!authUserId) return res.status(401).json({ message: 'Unauthorized' });
 
   try {
-    const chats = await Chat.find({ members: userId })
+    const chats = await Chat.find({ members: authUserId })
       .populate("members", "name profile_photo_url phoneNumber")
       .populate({
         path: "lastMessage",

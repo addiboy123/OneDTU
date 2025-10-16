@@ -17,6 +17,12 @@ exports.getAllMessages = async (req, res) => {
     const chatExists = await Chat.exists({ _id: chatId });
     if (!chatExists) return res.status(404).json({ message: "Chat not found" });
 
+    // Ensure requester is a member of the chat
+    const authUserId = req.user?.userId;
+    if (!authUserId) return res.status(401).json({ message: 'Unauthorized' });
+    const isMember = await Chat.exists({ _id: chatId, members: authUserId });
+    if (!isMember) return res.status(403).json({ message: 'Forbidden' });
+
     // Messages reference `chatId` and `senderId` per model
     const messages = await Message.find({ chatId })
       .populate("senderId", "name profile_photo_url _id")
@@ -31,15 +37,24 @@ exports.getAllMessages = async (req, res) => {
 
 // Send a new message (POST /api/v1/message/)
 exports.sendMessage = async (req, res) => {
-  const { chatId, senderType, senderId, messageType, messageText, attachmentUrl } = req.body;
+  const { chatId, senderType: incomingSenderType, senderId: incomingSenderId, messageType, messageText, attachmentUrl } = req.body;
+  const authUserId = req.user?.userId;
 
-  if (!chatId || !senderType || (senderType === 'user' && !senderId) || !messageType) {
+  if (!chatId || !incomingSenderType || !messageType) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
   try {
     const chat = await Chat.findById(chatId);
     if (!chat) return res.status(404).json({ message: 'Chat not found' });
+
+    // If senderType is 'user', ensure senderId is the authenticated user
+    const senderType = incomingSenderType;
+    let senderId = incomingSenderId;
+    if (senderType === 'user') {
+      if (!authUserId) return res.status(401).json({ message: 'Unauthorized' });
+      senderId = authUserId;
+    }
 
     const payload = { chatId, senderType, senderId, messageType };
     if (messageType === 'text') payload.messageText = messageText;
@@ -67,13 +82,13 @@ exports.sendMessage = async (req, res) => {
 // Mark all unread messages in a chat as read (for current user)
 exports.markMessagesAsRead = async (req, res) => {
   const { chatId } = req.params;
-  const { userId } = req.body;
+  const authUserId = req.user?.userId;
 
-  if (!chatId || !userId) return res.status(400).json({ error: 'chatId and userId are required' });
+  if (!chatId || !authUserId) return res.status(400).json({ error: 'chatId and authenticated user are required' });
 
   try {
     const result = await Message.updateMany(
-      { chatId, senderId: { $ne: userId }, isRead: false },
+      { chatId, senderId: { $ne: authUserId }, isRead: false },
       { $set: { isRead: true } }
     );
 
