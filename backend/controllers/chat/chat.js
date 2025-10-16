@@ -1,6 +1,3 @@
-// controllers/chatController.js
-
-// Safe model loader to support both CJS and ESM-style exports
 const loadModel = (path) => {
   const mod = require(path);
   return mod?.Chat || mod?.default || mod;
@@ -9,12 +6,8 @@ const loadModel = (path) => {
 const Chat = loadModel("../../models/Chat/chat.model");
 const User = require("../../models/User.js");
 
-
-// @desc    Access or create a chat between two users
-// @route   GET /api/chat/access
-// @access  Private
 exports.accessChat = async (req, res) => {
-  // authenticated user available on req.user (set by authentication middleware)
+
   const authUserId = req.user?.userId;
   const { phoneNumberOfReceivingUser } = req.query;
   if (!authUserId || !phoneNumberOfReceivingUser) {
@@ -55,10 +48,6 @@ exports.accessChat = async (req, res) => {
   }
 };
 
-
-// @desc    Get all chats of the logged-in user
-// @route   GET /api/chat
-// @access  Private
 exports.fetchUserChats = async (req, res) => {
   const authUserId = req.user?.userId;
   if (!authUserId) return res.status(401).json({ message: 'Unauthorized' });
