@@ -9,7 +9,7 @@ import SocietyConnect from "./pages/Societyconnect";
 import Society from "./pages/Society";
 import FindMySpace from "./pages/FindMySpacePage";
 import DtuNav from "./pages/DtuNav";
-
+import Chat from "./pages/Chat";
 import './index.css'; 
 
 const queryClient = new QueryClient({
@@ -37,6 +37,7 @@ function App() {
           <Route path="/findmyspace" element={<FindMySpace />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/dtunavigate" element={<DtuNav />} />
+          <Route path="/chat" element={<Chat />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
