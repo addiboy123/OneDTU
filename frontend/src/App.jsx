@@ -10,7 +10,7 @@ import Society from "./pages/Society";
 import FindMySpace from "./pages/FindMySpacePage";
 import QuickLinks from "./pages/QuickLinks";
 import DtuNav from "./pages/DtuNav";
-
+import Chat from "./pages/Chat";
 import './index.css'; 
 
 const queryClient = new QueryClient({
