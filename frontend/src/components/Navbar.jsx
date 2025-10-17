@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useState, useEffect, useRef } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, MessageCircle } from "lucide-react";
 import getDecodedToken from "../lib/auth";
 
 const Navbar = () => {
@@ -98,7 +98,12 @@ const Navbar = () => {
                 </Button>
               </>
             ) : (
-              <div className="relative" ref={userRef}>
+              <div className="relative flex items-center gap-3" ref={userRef}>
+                <Link to="/chat" title="Chat">
+                  <MessageCircle className="text-gray-200 hover:text-white" size={20} />
+                </Link>
+
+                <div className="relative">
                 <button
                   onClick={() => setUserMenuOpen((s) => !s)}
                   className="flex items-center gap-2 p-1 rounded-full focus:outline-none"
@@ -136,6 +141,7 @@ const Navbar = () => {
                   </div>
                 )}
               </div>
+            </div>
             )}
           </div>
 

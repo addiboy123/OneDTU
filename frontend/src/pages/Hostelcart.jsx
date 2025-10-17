@@ -5,7 +5,7 @@ import MainContent from "../components/hostelcart/MainContent";
 import AddItemModal from "../components/hostelcart/AddItemModal";
 import MyItemModal from "../components/hostelcart/MyItemModal";
 import OtherItemModal from "../components/hostelcart/OtherItemModal";
-import LoginPromptModal from "../components/hostelcart/LoginPromptModal";
+import LoginPromptModal from "../components/LoginPromptModal";
 import getDecodedToken from "../lib/auth";
 import api from "../api/interceptor";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
