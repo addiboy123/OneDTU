@@ -2,76 +2,39 @@ import Navbar from "../components/Navbar";
 import React, { useRef, useEffect } from "react";
 
 // -----------------------------
-// Card Data (you can replace links later)
+// Card Data (with actual DTU links)
 // -----------------------------
 const cardData = [
   {
-    title: "Admin Block",
-    imageUrl: "https://dtu.ac.in/Web/About/Images/admin_dtu.jpg",
-    link: "https://www.google.com/maps?q=Admin+Block,+DTU",
+    title: "Academics",
+    imageUrl: "https://dtu.ac.in/modules/dtutimes/times/images/gallery/codtu/25.jpg",
+    link: "https://dtu.ac.in/Web/Academics/academic_calender.php",
   },
   {
-    title: "Library",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/DelhiCollegeOfEngineering_Library.jpg/640px-DelhiCollegeOfEngineering_Library.jpg",
-    link: "https://www.google.com/maps?q=Library,+DTU",
+    title: "Results",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJucN7Q9cPOe1wqTTlo48fVJxF3_2ldc9_xg&s",
+    link: "https://exam.dtu.ac.in/result.htm",
   },
   {
-    title: "Senior Boys Hostel",
+    title: "Notices",
+    imageUrl: "https://i.postimg.cc/3r4L9FnL/Gemini-Generated-Image-54cyh054cyh054cy-2.png",
+    link: "https://exam.dtu.ac.in/Notices-n-Circulars.htm",
+  },
+  {
+    title: "Registration",
+    imageUrl: "https://i.postimg.cc/WbQcX4GJ/Screenshot-2025-10-11-at-16-29-09.png",
+    link: "https://reg.exam.dtu.ac.in/student/login",
+  },
+  {
+    title: "Library Portal",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWGX5VqJy4PCrTnlbpwtmj_RClmM3kUZmjXQ&s",
+    link: "https://dtu.bestbookbuddies.com/",
+  },
+  {
+    title: "Hostel Registration",
     imageUrl: "https://hostels.dtu.ac.in/images/hostels/apj-hostel.png",
-    link: "https://maps.app.goo.gl/7Ld5Yjt1AGuv8G8o8",
-  },
-  {
-    title: "VLB Girls Hostel",
-    imageUrl: "https://hostels.dtu.ac.in/images/hostels/vlb-hostel.png",
-    link: "https://maps.app.goo.gl/yeakmitFSJv4qU8w5",
-  },
-  {
-    title: "Pragya Bhavan",
-    imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nrgGSLhj9m9tcoAAaKaIJVvjBxuT1JVpmMfD7lJlrz0TawytNG3J5-qHDIGz2tJbXOeyWd4ABDu9q07ZvzcbiHwUrDlsF-EjR1DuOv6iC3o6BNwyl-Rc8ZeI3xkqxubgFdn9gM3=s1360-w1360-h1020-rw",
-    link: "https://maps.app.goo.gl/aqobE7ZmSkjRpzaM8",
-  },
-  {
-    title: "OAT (Open Air Theatre)",
-    imageUrl: "https://scontent.fpat8-1.fna.fbcdn.net/v/t39.30808-6/465361014_9328523277178390_8939195371344015296_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=SnSGpA1t66kQ7kNvwE1KzqQ&_nc_oc=Adm4ERBxLAlyA8hUNKVQAHu-rTTj7tEad5g-3ZfsuL0fBBIuK7NB5utPMW5UX-qxfno&_nc_zt=23&_nc_ht=scontent.fpat8-1.fna&_nc_gid=dMOPuSYGmAHZEVzIiazaAg&oh=00_Afe3cql1TmiiWCysA2jomisyBkadLUtGEuAa7DfP3J9aAQ&oe=68F7CA12",
-    link: "https://www.google.com/maps?q=OAT,+DTU",
-  },
-  {
-    title: "Sports Complex",
-    imageUrl: "https://content3.jdmagicbox.com/v2/comp/delhi/a2/011pxx11.xx11.190719235416.t9a2/catalogue/dtu-sports-complex-delhi-sports-clubs-4dgq2umsbl.jpg",
-    link: "https://www.google.com/maps?q=Football+Ground,+DTU",
-  },
-  {
-    title: "Academic Blocks",
-    imageUrl: "https://i.postimg.cc/brWLmW82/Whats-App-Image-2025-10-16-at-19-03-02.jpg",
-    link: "https://maps.app.goo.gl/Dj9zfK4EukubR9Pg9",
-  },
-  {
-    title: "SPS 9-12",
-    imageUrl: "https://i.postimg.cc/HLHPyq6d/sps9-12.webp",
-    link: " https://maps.app.goo.gl/Qp5U46vLma2SU4tQA",
-  },
-  
-  {
-    title: "SPS 1-8",
-    imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nq-lRLp_CbSM6lwveR_n4jD3Z0SUl_KOq43QdGPKagOpXLXMQglbTZizrTXYiOpfZZjG3kWLIP0iPKYBEBQ8EzGEwOugj2ucNNLJTkLAMShmxAE-XRrQnnxbP3DGIYtwV1V50jR=w203-h360-k-no",
-    link: "https://maps.app.goo.gl/z4cCUtM77PEAsUnZ8",
-  },
-  {
-    title: "ECE, Civil, Elect",
-    imageUrl: "https://dtu.ac.in/modules/alumni_old/images2/1483124_560602227348292_142122668_n.jpg",
-    link: "https://maps.app.goo.gl/76niJxaoZjZssurM9",
-  },
-  {
-    title: "Health Center",
-    imageUrl: "https://dtu.ac.in/Web/Facilities/images/health_center.jpeg",
-    link: "https://maps.app.goo.gl/uDa6qPXyWQu3Z4Xs6",
-  },
-  {
-    title: "Concert Ground",
-    imageUrl: "https://d1058u6qsarkub.cloudfront.net/95j7t%2Fpreview%2F71906657%2Fmain_large.png?response-content-disposition=inline%3Bfilename%3D%22main_large.png%22%3B&response-content-type=image%2Fpng&Expires=1760708403&Signature=IYzZKhUUyV~CHdNFV~TPIOQTyfiHEa-x2kCRT~ESezzynvgSsbmkuhzSefWXUoGE1DY0fIk4t2GlHnjdxYGTcCWQxBdd-DXiDkPvk5iQnPj9kFJthO0yYaSD-BxjnmGI9dHTs3T3CETsI6TdvUHDqFSkzpGaifiDEPSYaz0Y6GBDWCssHmcG2kAODdMGnbe-wtsZxvpmpkM~NFumUlZjLc8woK3TsWb~ceDWUpA~BgeU4jOTewSk~9lNakU8vU2psMIAOeCEqmwfdaUM25x9wA~nFoB2RSb~G6rgmojkS1ES1MYkFEIslFY2hp~z7N5XhhBV3xXT1d5o0PDhpjAA9A__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ",
-    link: "https://maps.app.goo.gl/ZEDs39Ct3431xoiW7",
-  },
- 
+    link: "https://saarthi.dtu.ac.in/hostel/hostel_prod_2025/hostel_registration/Login.php#",
+  }
 ];
 
 // -----------------------------
@@ -130,7 +93,7 @@ const InteractiveCard = ({ title, imageUrl, link }) => {
           rel="noopener noreferrer"
           className="mt-5 inline-block bg-blue-600 text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:bg-blue-700 transition-colors duration-300"
         >
-          View on Map
+          Visit Link
         </a>
       </div>
     </div>
@@ -143,11 +106,11 @@ const InteractiveCard = ({ title, imageUrl, link }) => {
 const Header = () => (
   <header className="text-center mb-10 md:mb-16">
     <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-      DTU Navigate
+      DTU Quick Links
     </h1>
     <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-      Explore your DTU campus effortlessly. Click any location below to open it
-      directly in Google Maps.
+      Your one-stop portal for essential DTU resources. Navigate the university
+      with ease.
     </p>
   </header>
 );

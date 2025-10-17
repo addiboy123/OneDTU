@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import SocietyConnect from "./pages/Societyconnect";
 import Society from "./pages/Society";
 import FindMySpace from "./pages/FindMySpacePage";
+import QuickLinks from "./pages/QuickLinks";
 import DtuNav from "./pages/DtuNav";
 
 import './index.css'; 
@@ -36,7 +37,10 @@ function App() {
           <Route path="/societyconnect/:name" element={<Society />} />
           <Route path="/findmyspace" element={<FindMySpace />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/dtunavigate" element={<DtuNav />} />
+          <Route path="/dtuquicklinks" element={<QuickLinks />} />
+          <Route path="/dtunav" element={<DtuNav />} />
+
+          
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
