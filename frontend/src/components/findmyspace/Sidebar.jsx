@@ -1,42 +1,68 @@
 // src/components/findmyspace/Sidebar.jsx
 
-// ✅ CORRECTED: Changed `onPostClick` to `onSidebarClick` to match the function call below.
-function Sidebar({ title, posts, onSidebarClick, onEditPost, onDeletePost }) {
+import { X } from 'lucide-react'; // For the close button
+
+// ✅ RESPONSIVE: Added isOpen and onClose to props
+function Sidebar({ title, posts, onSidebarClick, onEditPost, onDeletePost, isOpen, onClose }) {
   return (
-    <aside className="w-64 bg-gray-800 text-white p-4 flex flex-col shrink-0">
-      <h2 className="text-xl font-bold mb-6 border-b border-gray-600 pb-2">{title}</h2>
-      
-      {posts.length === 0 ? (
-        <p className="text-gray-400 text-sm">You have not created any posts in this category yet.</p>
-      ) : (
-        <div className="flex flex-col gap-4 overflow-y-auto">
-          {posts.map((post) => {
-            const coverImage = post.images ? post.images[0] : post.roomImage?.[0];
+    // ✅ RESPONSIVE: Updated classes for responsive behavior
+    // - `fixed` on mobile, `relative` on large screens (`lg:`)
+    // - Slides in and out based on the `isOpen` state on mobile
+    // - `z-30` ensures it's on top of other content
+    <aside
+      className={`
+        fixed top-0 left-0 h-full bg-gray-800 text-white z-30
+        w-72 sm:w-80 flex flex-col shrink-0
+        transform transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:relative lg:translate-x-0
+      `}
+    >
+      {/* Sidebar Header */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-600 shrink-0">
+        <h2 className="text-xl font-bold">{title}</h2>
+        {/* ✅ RESPONSIVE: Close button, only visible on screens smaller than lg */}
+        <button
+          onClick={onClose}
+          className="lg:hidden p-1 text-gray-400 hover:text-white rounded-full hover:bg-gray-700"
+          aria-label="Close sidebar"
+        >
+          <X size={24} />
+        </button>
+      </div>
+
+      {/* Sidebar Content */}
+      <div className="p-4 flex flex-col gap-4 overflow-y-auto">
+        {posts.length === 0 ? (
+          <p className="text-gray-400 text-sm">You have not created any posts in this category yet.</p>
+        ) : (
+          posts.map((post) => {
+            const coverImage = post.images?.[0] || post.roomImage?.[0];
 
             return (
-              <div 
-                key={post._id} 
+              <div
+                key={post._id}
                 className="bg-gray-700 rounded-lg p-2 relative cursor-pointer group hover:bg-gray-600 transition-colors"
-                onClick={() => onSidebarClick(post)} // This now correctly calls the prop
+                onClick={() => onSidebarClick(post)}
               >
-                {/* Buttons are positioned relative to this container */}
+                {/* Edit/Delete Buttons */}
                 <div className="absolute top-1 right-1 flex gap-1 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button 
+                  <button
                     onClick={(e) => {
-                      e.stopPropagation(); // Prevents the card's onClick from firing
+                      e.stopPropagation();
                       onEditPost(post);
-                    }} 
-                    className="p-1.5 h-6 w-6 flex items-center justify-center rounded-full bg-gray-600 hover:bg-blue-600 text-xs" 
+                    }}
+                    className="p-1.5 h-6 w-6 flex items-center justify-center rounded-full bg-gray-600 hover:bg-blue-600 text-xs"
                     title="Edit Post"
                   >
                     ✏️
                   </button>
-                  <button 
+                  <button
                     onClick={(e) => {
-                      e.stopPropagation(); // Prevents the card's onClick from firing
+                      e.stopPropagation();
                       onDeletePost(post._id);
-                    }} 
-                    className="p-1.5 h-6 w-6 flex items-center justify-center rounded-full bg-gray-600 hover:bg-red-600 text-xs" 
+                    }}
+                    className="p-1.5 h-6 w-6 flex items-center justify-center rounded-full bg-gray-600 hover:bg-red-600 text-xs"
                     title="Delete Post"
                   >
                     🗑️
@@ -46,7 +72,7 @@ function Sidebar({ title, posts, onSidebarClick, onEditPost, onDeletePost }) {
                 {/* Main Content */}
                 <div className="w-full h-24 bg-gray-500 rounded-md mb-2">
                   {coverImage ? (
-                    <img src={coverImage} alt={post.title} className="w-full h-full object-cover rounded-md" />
+                    <img src={coverImage} alt={post.title || "Post image"} className="w-full h-full object-cover rounded-md" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
                   )}
@@ -54,9 +80,9 @@ function Sidebar({ title, posts, onSidebarClick, onEditPost, onDeletePost }) {
                 <h3 className="font-semibold text-sm truncate">{post.title}</h3>
               </div>
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </div>
     </aside>
   );
 }

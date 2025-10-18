@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Menu } from 'lucide-react'; // ✅ RESPONSIVE: Import icon for hamburger menu
+
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/findmyspace/Sidebar";
 import PostGrid from "../components/findmyspace/PostGrid";
@@ -20,9 +22,10 @@ function FindMySpacePage() {
   const [activeTab, setActiveTab] = useState("FLAT");
   const [posts, setPosts] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
-
-  // ✅ ADDED: State to handle opening a specific PG room from the sidebar
   const [initialRoom, setInitialRoom] = useState(null);
+  
+  // ✅ RESPONSIVE: State to manage sidebar visibility on mobile/tablet
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // State for Modals
   const [isFlatModalOpen, setIsFlatModalOpen] = useState(false);
@@ -31,16 +34,12 @@ function FindMySpacePage() {
   const [editingPgPost, setEditingPgPost] = useState(null);
   const [currentPgId, setCurrentPgId] = useState(null);
 
-  // Use React Query to fetch flats / pgs depending on activeTab
   const { data: rawData, isLoading, isError, refetch } = useQuery({
     queryKey: ["findMySpace", activeTab],
-    queryFn: async () => {
-      return activeTab === "FLAT" ? await api.getAllFlats() : await api.getAllPGs();
-    },
+    queryFn: () => activeTab === "FLAT" ? api.getAllFlats() : api.getAllPGs(),
     staleTime: 1000 * 60 * 2,
   });
 
-  // derive posts from the query response and keep selectedPost in sync
   useEffect(() => {
     const response = rawData;
     const newPosts = response
@@ -52,99 +51,127 @@ function FindMySpacePage() {
 
     if (selectedPost) {
       const updatedSelectedPost = newPosts.find((p) => p._id === selectedPost._id);
-      if (updatedSelectedPost) setSelectedPost(updatedSelectedPost);
-      else setSelectedPost(null);
+      setSelectedPost(updatedSelectedPost || null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rawData, activeTab]);
+  }, [rawData, activeTab, selectedPost]);
 
   // --- Handlers ---
   const handleOpenFlatModal = (flat = null) => { setEditingFlat(flat); setIsFlatModalOpen(true); };
-  const handleCloseFlatModal = () => { setEditingFlat(null); setIsFlatModalOpen(false); fetchData(); };
+  const handleCloseFlatModal = () => { setEditingFlat(null); setIsFlatModalOpen(false); refetch(); };
   const handleFlatSubmit = async (formData) => {
-    // ... (logic is correct, but relies on handleCloseFlatModal to refresh)
+    // Logic for submitting...
+    handleCloseFlatModal();
   };
   const handleFlatDelete = async (flatId) => {
-    // ... (logic is correct, relies on fetchData to refresh)
+    // Logic for deleting...
+    refetch();
   };
   const handleOpenPgPostModal = (post = null, pgId) => {
     setEditingPgPost(post);
     setCurrentPgId(pgId);
     setIsPgPostModalOpen(true);
   };
-  const handleClosePgPostModal = () => { setEditingPgPost(null); setIsPgPostModalOpen(false); fetchData(); };
+  const handleClosePgPostModal = () => { setEditingPgPost(null); setIsPgPostModalOpen(false); refetch(); };
   const handlePgPostSubmit = async (formData) => {
-    // ... (logic is correct, but relies on handleClosePgPostModal to refresh)
+    // Logic for submitting...
+    handleClosePgPostModal();
   };
   const handlePgPostDelete = async (postId) => {
-    // ... (logic is correct, relies on fetchData to refresh)
+    // Logic for deleting...
+    refetch();
   };
   
-  // ✅ ADDED: A "smart" handler for all sidebar clicks
   const handleSidebarClick = (item) => {
-    // If it's a Flat, just open its detail page
-    if (item.images) {
+    if (item.images) { // It's a Flat
       setSelectedPost(item);
-    } 
-    // If it's a PG Room, find its parent PG and tell PostDetail to open this specific room
-    else if (item.roomImage) {
+    } else if (item.roomImage) { // It's a PG Room
       const parentPg = posts.find(p => p._id === item.parentPG);
       if (parentPg) {
-        setInitialRoom(item); // Tell PostDetail which room to open
-        setSelectedPost(parentPg); // Open the parent PG's detail page
+        setInitialRoom(item);
+        setSelectedPost(parentPg);
       }
     }
+    // ✅ RESPONSIVE: Close sidebar after a selection is made on mobile
+    setIsSidebarOpen(false);
   };
 
   const handlePostClick = (post) => setSelectedPost(post);
-  const handleBackToListing = () => { setSelectedPost(null); }; // fetchData is no longer needed here
+  const handleBackToListing = () => { setSelectedPost(null); };
   
   const userOwnedPosts = (() => {
     if (!currentUserId || posts.length === 0) return [];
     if (activeTab === 'FLAT') {
       return posts.filter(post => post.createdBy === currentUserId);
-    } else {
-      return posts
-        .flatMap(pg => pg.posts || [])
-        .filter(room => room.createdBy === currentUserId);
     }
+    return posts
+      .flatMap(pg => pg.posts || [])
+      .filter(room => room.createdBy === currentUserId);
   })();
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 font-sans">
       <Navbar />
-      <div className="flex flex-1 overflow-hidden">
+      {/* ✅ RESPONSIVE: Added `relative` to contain the absolutely positioned sidebar on mobile */}
+      <div className="flex flex-1 overflow-hidden relative">
         <Sidebar 
           title={activeTab === 'FLAT' ? "Your Flat Posts" : "Your PG Posts"} 
           posts={userOwnedPosts} 
-          onSidebarClick={handleSidebarClick} // ✅ CHANGED: Use the new smart handler
+          onSidebarClick={handleSidebarClick}
           onEditPost={activeTab === 'FLAT' ? handleOpenFlatModal : (post) => handleOpenPgPostModal(post, post.parentPG)}
           onDeletePost={activeTab === 'FLAT' ? handleFlatDelete : handlePgPostDelete}
+          // ✅ RESPONSIVE: Pass state and handler to Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
-        <div className="flex-1 flex flex-col overflow-hidden">
+
+        {/* ✅ RESPONSIVE: Overlay for mobile view when sidebar is open */}
+        {isSidebarOpen && (
+          <div 
+            onClick={() => setIsSidebarOpen(false)} 
+            className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+            aria-hidden="true"
+          />
+        )}
+
+        <main className="flex-1 flex flex-col overflow-y-auto">
           {selectedPost ? (
             <PostDetail 
-              key={selectedPost._id} // Adding key forces re-mount with fresh state
+              key={selectedPost._id}
               post={selectedPost} 
               onBack={handleBackToListing} 
               onOpenPgPostModal={handleOpenPgPostModal}
-              initialRoom={initialRoom} // ✅ Pass the room to open
-              onViewedInitialRoom={() => setInitialRoom(null)} // ✅ Pass function to reset state
+              initialRoom={initialRoom}
+              onViewedInitialRoom={() => setInitialRoom(null)}
             />
           ) : (
             <>
-              <HeaderTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-              <PostGrid posts={posts} onPostClick={handlePostClick} />
+              {/* ✅ RESPONSIVE: Header now includes hamburger menu button */}
+              <div className="flex items-center border-b border-gray-200 bg-white sticky top-0 z-10 px-4">
+                <button
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="p-2 mr-2 text-gray-600 lg:hidden"
+                  aria-label="Open sidebar"
+                >
+                  <Menu size={24} />
+                </button>
+                <HeaderTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+              </div>
+
+              {/* ✅ RESPONSIVE: Added a container for padding */}
+              <div className="p-4 sm:p-6 lg:p-8">
+                <PostGrid posts={posts} onPostClick={handlePostClick} isLoading={isLoading} isError={isError} />
+              </div>
             </>
           )}
-        </div>
+        </main>
       </div>
 
       {/* --- Modals --- */}
       {token && activeTab === 'FLAT' && !selectedPost && (
         <button 
           onClick={() => handleOpenFlatModal()} 
-          className="fixed bottom-8 right-8 z-10 w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-3xl shadow-lg hover:bg-blue-700 transition-transform hover:scale-110"
+          // ✅ RESPONSIVE: Adjusted FAB position for smaller screens
+          className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-10 w-14 h-14 sm:w-16 sm:h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-3xl shadow-lg hover:bg-blue-700 transition-transform hover:scale-110"
           title="Add New Flat"
         >
           +
