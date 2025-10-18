@@ -1,8 +1,9 @@
 import Navbar from "../components/Navbar";
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
+import { Search } from "lucide-react"; // ✅ Import search icon
 
 // -----------------------------
-// Card Data (you can replace links later)
+// Card Data
 // -----------------------------
 const cardData = [
   {
@@ -12,7 +13,8 @@ const cardData = [
   },
   {
     title: "Library",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/DelhiCollegeOfEngineering_Library.jpg/640px-DelhiCollegeOfEngineering_Library.jpg",
+    imageUrl:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/DelhiCollegeOfEngineering_Library.jpg/640px-DelhiCollegeOfEngineering_Library.jpg",
     link: "https://www.google.com/maps?q=Library,+DTU",
   },
   {
@@ -26,18 +28,20 @@ const cardData = [
     link: "https://maps.app.goo.gl/yeakmitFSJv4qU8w5",
   },
   {
-    title: "Pragya Bhavan",
-    imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nrgGSLhj9m9tcoAAaKaIJVvjBxuT1JVpmMfD7lJlrz0TawytNG3J5-qHDIGz2tJbXOeyWd4ABDu9q07ZvzcbiHwUrDlsF-EjR1DuOv6iC3o6BNwyl-Rc8ZeI3xkqxubgFdn9gM3=s1360-w1360-h1020-rw",
+    title: "Pragya Bhawan",
+    imageUrl:"https://i.postimg.cc/L5zxRvgf/unnamed.jpg",
     link: "https://maps.app.goo.gl/aqobE7ZmSkjRpzaM8",
   },
   {
     title: "OAT (Open Air Theatre)",
-    imageUrl: "https://scontent.fpat8-1.fna.fbcdn.net/v/t39.30808-6/465361014_9328523277178390_8939195371344015296_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=SnSGpA1t66kQ7kNvwE1KzqQ&_nc_oc=Adm4ERBxLAlyA8hUNKVQAHu-rTTj7tEad5g-3ZfsuL0fBBIuK7NB5utPMW5UX-qxfno&_nc_zt=23&_nc_ht=scontent.fpat8-1.fna&_nc_gid=dMOPuSYGmAHZEVzIiazaAg&oh=00_Afe3cql1TmiiWCysA2jomisyBkadLUtGEuAa7DfP3J9aAQ&oe=68F7CA12",
+    imageUrl:
+      "https://scontent.fpat8-1.fna.fbcdn.net/v/t39.30808-6/465361014_9328523277178390_8939195371344015296_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=SnSGpA1t66kQ7kNvwE1KzqQ&_nc_oc=Adm4ERBxLAlyA8hUNKVQAHu-rTTj7tEad5g-3ZfsuL0fBBIuK7NB5utPMW5UX-qxfno&_nc_zt=23&_nc_ht=scontent.fpat8-1.fna&_nc_gid=dMOPuSYGmAHZEVzIiazaAg&oh=00_Afe3cql1TmiiWCysA2jomisyBkadLUtGEuAa7DfP3J9aAQ&oe=68F7CA12",
     link: "https://www.google.com/maps?q=OAT,+DTU",
   },
   {
     title: "Sports Complex",
-    imageUrl: "https://content3.jdmagicbox.com/v2/comp/delhi/a2/011pxx11.xx11.190719235416.t9a2/catalogue/dtu-sports-complex-delhi-sports-clubs-4dgq2umsbl.jpg",
+    imageUrl:
+      "https://content3.jdmagicbox.com/v2/comp/delhi/a2/011pxx11.xx11.190719235416.t9a2/catalogue/dtu-sports-complex-delhi-sports-clubs-4dgq2umsbl.jpg",
     link: "https://www.google.com/maps?q=Football+Ground,+DTU",
   },
   {
@@ -50,15 +54,16 @@ const cardData = [
     imageUrl: "https://i.postimg.cc/HLHPyq6d/sps9-12.webp",
     link: " https://maps.app.goo.gl/Qp5U46vLma2SU4tQA",
   },
-  
   {
     title: "SPS 1-8",
-    imageUrl: "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nq-lRLp_CbSM6lwveR_n4jD3Z0SUl_KOq43QdGPKagOpXLXMQglbTZizrTXYiOpfZZjG3kWLIP0iPKYBEBQ8EzGEwOugj2ucNNLJTkLAMShmxAE-XRrQnnxbP3DGIYtwV1V50jR=w203-h360-k-no",
+    imageUrl:
+      "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nq-lRLp_CbSM6lwveR_n4jD3Z0SUl_KOq43QdGPKagOpXLXMQglbTZizrTXYiOpfZZjG3kWLIP0iPKYBEBQ8EzGEwOugj2ucNNLJTkLAMShmxAE-XRrQnnxbP3DGIYtwV1V50jR=w203-h360-k-no",
     link: "https://maps.app.goo.gl/z4cCUtM77PEAsUnZ8",
   },
   {
     title: "ECE, Civil, Elect",
-    imageUrl: "https://dtu.ac.in/modules/alumni_old/images2/1483124_560602227348292_142122668_n.jpg",
+    imageUrl:
+      "https://dtu.ac.in/modules/alumni_old/images2/1483124_560602227348292_142122668_n.jpg",
     link: "https://maps.app.goo.gl/76niJxaoZjZssurM9",
   },
   {
@@ -68,9 +73,24 @@ const cardData = [
   },
   {
     title: "Concert Ground",
-    imageUrl: "https://d1058u6qsarkub.cloudfront.net/95j7t%2Fpreview%2F71906657%2Fmain_large.png?response-content-disposition=inline%3Bfilename%3D%22main_large.png%22%3B&response-content-type=image%2Fpng&Expires=1760708403&Signature=IYzZKhUUyV~CHdNFV~TPIOQTyfiHEa-x2kCRT~ESezzynvgSsbmkuhzSefWXUoGE1DY0fIk4t2GlHnjdxYGTcCWQxBdd-DXiDkPvk5iQnPj9kFJthO0yYaSD-BxjnmGI9dHTs3T3CETsI6TdvUHDqFSkzpGaifiDEPSYaz0Y6GBDWCssHmcG2kAODdMGnbe-wtsZxvpmpkM~NFumUlZjLc8woK3TsWb~ceDWUpA~BgeU4jOTewSk~9lNakU8vU2psMIAOeCEqmwfdaUM25x9wA~nFoB2RSb~G6rgmojkS1ES1MYkFEIslFY2hp~z7N5XhhBV3xXT1d5o0PDhpjAA9A__&Key-Pair-Id=APKAJT5WQLLEOADKLHBQ",
+    imageUrl:
+      "https://i.postimg.cc/c17T59RX/Screenshot-2025-10-17-at-18-55-14.png",
     link: "https://maps.app.goo.gl/ZEDs39Ct3431xoiW7",
   },
+  {
+    title: "Nescafe DTU",
+    imageUrl:"https://media.licdn.com/dms/image/v2/D5622AQFZZPft5glAJQ/feedshare-shrink_800/feedshare-shrink_800/0/1720155925035?e=2147483647&v=beta&t=wBqRNQ4cAyKdudXffX2iv3L-iQ0m2IGow4hy82nteSo",
+    link: "https://maps.app.goo.gl/KLm4Wpzc7eaGtKJg6",
+  },
+  {
+    title: "HIMS and DelTech",
+    imageUrl:"https://i.postimg.cc/QdZ8xM9N/Gemini-Generated-Image-a5cm4a5cm4a5cm4a.png",
+    link: "https://maps.app.goo.gl/cd45nSKkvG7jc5Jz9",
+  },
+  
+  // -----------------------------
+  // New Additions
+  // -----------------------------
  
 ];
 
@@ -146,8 +166,7 @@ const Header = () => (
       DTU Navigate
     </h1>
     <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-      Explore your DTU campus effortlessly. Click any location below to open it
-      directly in Google Maps.
+      Explore your DTU campus effortlessly. Click any location below to open it directly in Google Maps.
     </p>
   </header>
 );
@@ -158,8 +177,7 @@ const Header = () => (
 const Footer = () => (
   <footer className="text-center mt-10 md:mt-16">
     <p className="text-gray-400">
-      &copy; {new Date().getFullYear()} Delhi Technological University. All
-      Rights Reserved.
+      &copy; {new Date().getFullYear()} Delhi Technological University. All Rights Reserved.
     </p>
   </footer>
 );
@@ -168,6 +186,12 @@ const Footer = () => (
 // Main Page Component
 // -----------------------------
 export default function DtuNav() {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredCards = cardData.filter((card) =>
+    card.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div
       className="min-h-screen flex flex-col"
@@ -180,12 +204,30 @@ export default function DtuNav() {
       <main className="flex-grow w-full max-w-7xl mx-auto flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8">
         <Header />
 
-        {/* Grid of Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-10 justify-items-center">
-          {cardData.map((card, index) => (
-            <InteractiveCard key={index} {...card} />
-          ))}
+        {/* Search Bar with Icon */}
+        <div className="w-full max-w-md mb-10 relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search a location (e.g., Library, Hostel, OAT)..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-12 pr-5 py-3 rounded-xl border border-gray-600 bg-white/90 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md placeholder-gray-500"
+          />
         </div>
+
+        {/* Grid or No Results */}
+        {filteredCards.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-10 justify-items-center">
+            {filteredCards.map((card, index) => (
+              <InteractiveCard key={index} {...card} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-gray-300 mt-10 text-lg font-medium">
+            No locations found 😔
+          </div>
+        )}
 
         <Footer />
       </main>
