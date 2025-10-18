@@ -1,97 +1,74 @@
 import Navbar from "../components/Navbar";
 import React, { useRef, useEffect, useState } from "react";
-import { Search } from "lucide-react"; // ✅ Import search icon
+import { Search } from "lucide-react"; // ✅ Importing icon
 
 // -----------------------------
-// Card Data
+// Card Data (with actual DTU links)
 // -----------------------------
 const cardData = [
   {
-    title: "Admin Block",
-    imageUrl: "https://dtu.ac.in/Web/About/Images/admin_dtu.jpg",
-    link: "https://www.google.com/maps?q=Admin+Block,+DTU",
+    title: "Academics",
+    imageUrl: "https://dtu.ac.in/modules/dtutimes/times/images/gallery/codtu/25.jpg",
+    link: "https://dtu.ac.in/Web/Academics/academic_calender.php",
   },
   {
-    title: "Library",
-    imageUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/DelhiCollegeOfEngineering_Library.jpg/640px-DelhiCollegeOfEngineering_Library.jpg",
-    link: "https://www.google.com/maps?q=Library,+DTU",
+    title: "Results",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJucN7Q9cPOe1wqTTlo48fVJxF3_2ldc9_xg&s",
+    link: "https://exam.dtu.ac.in/result.htm",
   },
   {
-    title: "Senior Boys Hostel",
+    title: "Notices",
+    imageUrl: "https://i.postimg.cc/3r4L9FnL/Gemini-Generated-Image-54cyh054cyh054cy-2.png",
+    link: "https://exam.dtu.ac.in/Notices-n-Circulars.htm",
+  },
+  {
+    title: "Registration",
+    imageUrl: "https://i.postimg.cc/WbQcX4GJ/Screenshot-2025-10-11-at-16-29-09.png",
+    link: "https://reg.exam.dtu.ac.in/student/login",
+  },
+  {
+    title: "Library Portal",
+    imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRWGX5VqJy4PCrTnlbpwtmj_RClmM3kUZmjXQ&s",
+    link: "https://dtu.bestbookbuddies.com/",
+  },
+  {
+    title: "Hostel Registration",
     imageUrl: "https://hostels.dtu.ac.in/images/hostels/apj-hostel.png",
-    link: "https://maps.app.goo.gl/7Ld5Yjt1AGuv8G8o8",
+    link: "https://saarthi.dtu.ac.in/hostel/hostel_prod_2025/hostel_registration/Login.php#",
   },
-  {
-    title: "VLB Girls Hostel",
-    imageUrl: "https://hostels.dtu.ac.in/images/hostels/vlb-hostel.png",
-    link: "https://maps.app.goo.gl/yeakmitFSJv4qU8w5",
-  },
-  {
-    title: "Pragya Bhawan",
-    imageUrl:"https://i.postimg.cc/L5zxRvgf/unnamed.jpg",
-    link: "https://maps.app.goo.gl/aqobE7ZmSkjRpzaM8",
-  },
-  {
-    title: "OAT (Open Air Theatre)",
-    imageUrl:
-      "https://scontent.fpat8-1.fna.fbcdn.net/v/t39.30808-6/465361014_9328523277178390_8939195371344015296_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=SnSGpA1t66kQ7kNvwE1KzqQ&_nc_oc=Adm4ERBxLAlyA8hUNKVQAHu-rTTj7tEad5g-3ZfsuL0fBBIuK7NB5utPMW5UX-qxfno&_nc_zt=23&_nc_ht=scontent.fpat8-1.fna&_nc_gid=dMOPuSYGmAHZEVzIiazaAg&oh=00_Afe3cql1TmiiWCysA2jomisyBkadLUtGEuAa7DfP3J9aAQ&oe=68F7CA12",
-    link: "https://www.google.com/maps?q=OAT,+DTU",
-  },
-  {
-    title: "Sports Complex",
-    imageUrl:
-      "https://content3.jdmagicbox.com/v2/comp/delhi/a2/011pxx11.xx11.190719235416.t9a2/catalogue/dtu-sports-complex-delhi-sports-clubs-4dgq2umsbl.jpg",
-    link: "https://www.google.com/maps?q=Football+Ground,+DTU",
-  },
-  {
-    title: "Academic Blocks",
-    imageUrl: "https://i.postimg.cc/brWLmW82/Whats-App-Image-2025-10-16-at-19-03-02.jpg",
-    link: "https://maps.app.goo.gl/Dj9zfK4EukubR9Pg9",
-  },
-  {
-    title: "SPS 9-12",
-    imageUrl: "https://i.postimg.cc/HLHPyq6d/sps9-12.webp",
-    link: " https://maps.app.goo.gl/Qp5U46vLma2SU4tQA",
-  },
-  {
-    title: "SPS 1-8",
-    imageUrl:
-      "https://lh3.googleusercontent.com/gps-cs-s/AC9h4nq-lRLp_CbSM6lwveR_n4jD3Z0SUl_KOq43QdGPKagOpXLXMQglbTZizrTXYiOpfZZjG3kWLIP0iPKYBEBQ8EzGEwOugj2ucNNLJTkLAMShmxAE-XRrQnnxbP3DGIYtwV1V50jR=w203-h360-k-no",
-    link: "https://maps.app.goo.gl/z4cCUtM77PEAsUnZ8",
-  },
-  {
-    title: "ECE, Civil, Elect",
-    imageUrl:
-      "https://dtu.ac.in/modules/alumni_old/images2/1483124_560602227348292_142122668_n.jpg",
-    link: "https://maps.app.goo.gl/76niJxaoZjZssurM9",
-  },
-  {
-    title: "Health Center",
-    imageUrl: "https://dtu.ac.in/Web/Facilities/images/health_center.jpeg",
-    link: "https://maps.app.goo.gl/uDa6qPXyWQu3Z4Xs6",
-  },
-  {
-    title: "Concert Ground",
-    imageUrl:
-      "https://i.postimg.cc/c17T59RX/Screenshot-2025-10-17-at-18-55-14.png",
-    link: "https://maps.app.goo.gl/ZEDs39Ct3431xoiW7",
-  },
-  {
-    title: "Nescafe DTU",
-    imageUrl:"https://media.licdn.com/dms/image/v2/D5622AQFZZPft5glAJQ/feedshare-shrink_800/feedshare-shrink_800/0/1720155925035?e=2147483647&v=beta&t=wBqRNQ4cAyKdudXffX2iv3L-iQ0m2IGow4hy82nteSo",
-    link: "https://maps.app.goo.gl/KLm4Wpzc7eaGtKJg6",
-  },
-  {
-    title: "HIMS and DelTech",
-    imageUrl:"https://i.postimg.cc/QdZ8xM9N/Gemini-Generated-Image-a5cm4a5cm4a5cm4a.png",
-    link: "https://maps.app.goo.gl/cd45nSKkvG7jc5Jz9",
-  },
-  
-  // -----------------------------
-  // New Additions
-  // -----------------------------
- 
+  { title: "Applied Chemistry", imageUrl: "https://i.postimg.cc/4NM2RK03/Gemini-Generated-Image-9spvei9spvei9spv.png", link: "https://dtu.ac.in/Web/Departments/AppliedChemistry/faculty/" },
+  { title: "Applied Mathematics", imageUrl: "https://i.postimg.cc/LXXjsDYp/Gemini-Generated-Image-v4ka16v4ka16v4ka.png", link: "https://dtu.ac.in/Web/Departments/AppliedMathematics/faculty/" },
+  { title: "Applied Physics", imageUrl: "https://i.postimg.cc/6QCdSqkd/apphy.jpg", link: "https://dtu.ac.in/Web/Departments/AppliedPhysics/faculty/" },
+  { title: "Biotechnology", imageUrl: "https://i.postimg.cc/Jhjbg0fK/biotec.jpg", link: "https://dtu.ac.in/Web/Departments/BioTech/about/" },
+  { title: "Civil Engineering", imageUrl: "https://i.postimg.cc/Qd2Q01yM/civil.jpg", link: "https://dtu.ac.in/Web/Departments/Civil/faculty/" },
+  { title: "CSE", imageUrl: "https://i.postimg.cc/x1wvtM4b/cse.jpg", link: "https://dtu.ac.in/Web/Departments/CSE/faculty/" },
+  { title: "DSM", imageUrl: "https://i.postimg.cc/Dw9rBLMG/dsm.jpg", link: "https://dtu.ac.in/Web/Departments/DSM/faculty/" },
+  { title: "ECE", imageUrl: "https://i.postimg.cc/6pkrYnmn/ece.jpg", link: "https://dtu.ac.in/Web/Departments/Electronics/faculty/" },
+  { title: "Electrical Engineering", imageUrl: "https://i.postimg.cc/GmWFqG5T/electrical.jpg", link: "https://dtu.ac.in/Web/Departments/Electrical/faculty/" },
+  { title: "Environmental Science & Engineering", imageUrl: "https://i.postimg.cc/VkxqDnVr/ese.jpg", link: "https://dtu.ac.in/Web/Departments/Environment/faculty/" },
+  { title: "Humanities", imageUrl: "https://i.postimg.cc/6pkrYnmC/humaniti.jpg", link: "https://dtu.ac.in/Web/Departments/Humanities/faculty/" },
+  { title: "Information Technology", imageUrl: "https://i.postimg.cc/cJfQjCpR/it.jpg", link: "https://dtu.ac.in/Web/Departments/InformationTechnology/faculty/" },
+  { title: "Mechanical Engineering", imageUrl: "https://i.postimg.cc/nhy40BP4/me.jpg", link: "https://dtu.ac.in/Web/Departments/Mechanical/faculty/" },
+  { title: "Design", imageUrl: "https://i.postimg.cc/KYtnVj6L/design.jpg", link: "https://dtu.ac.in/Web/Departments/design/faculty/" },
+  { title: "USME", imageUrl: "https://i.postimg.cc/MG1y4HC9/univschool-Management.jpg", link: "https://dtu.ac.in/Web/Departments/eastcampus/faculty/" },
+  { title: "Software Engineering", imageUrl: "https://i.postimg.cc/Dw9rBLMq/se.jpg", link: "https://dtu.ac.in/Web/Departments/SE/faculty/" },
+  { title: "Physical Education", imageUrl: "https://i.postimg.cc/QMcpPC21/pe.jpg", link: "https://dtu.ac.in/Web/Departments/phyedu/faculty/" },
+   {
+      title: "DTU-IIF",
+      imageUrl: "https://i.postimg.cc/sXxQ924p/Gemini-Generated-Image-7ypyg67ypyg67ypy.png",
+      link: "https://dtuiif.accubate.app/user/login",
+    },
+    {
+      title: "TnP Department",
+      imageUrl: "https://i.postimg.cc/66SjZ2fr/Screenshot-2025-10-18-at-14-07-40.png",
+      link: "https://tnp.dtu.ac.in/",
+    },
+    {
+      title: "Syllabus & Curriculum",
+      imageUrl: "https://i.postimg.cc/tTJZtgNW/Gemini-Generated-Image-s5curts5curts5cu.png",
+      link: "https://www.dtu.ac.in/Web/Academics/syllabus.php",
+    },
+
 ];
 
 // -----------------------------
@@ -150,7 +127,7 @@ const InteractiveCard = ({ title, imageUrl, link }) => {
           rel="noopener noreferrer"
           className="mt-5 inline-block bg-blue-600 text-white text-sm font-semibold py-2.5 px-5 rounded-lg hover:bg-blue-700 transition-colors duration-300"
         >
-          View on Map
+          Visit Link
         </a>
       </div>
     </div>
@@ -161,12 +138,12 @@ const InteractiveCard = ({ title, imageUrl, link }) => {
 // Header Component
 // -----------------------------
 const Header = () => (
-  <header className="text-center mb-10 md:mb-16">
+  <header className="text-center mb-10 md:mb-12">
     <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
-      DTU Navigate
+      DTU Quick Links
     </h1>
     <p className="mt-4 text-lg text-gray-300 max-w-2xl mx-auto">
-      Explore your DTU campus effortlessly. Click any location below to open it directly in Google Maps.
+      Your one-stop portal for essential DTU resources. Navigate the university with ease.
     </p>
   </header>
 );
@@ -183,7 +160,7 @@ const Footer = () => (
 );
 
 // -----------------------------
-// Main Page Component
+// Main Page Component with Search
 // -----------------------------
 export default function DtuNav() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -209,7 +186,7 @@ export default function DtuNav() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
           <input
             type="text"
-            placeholder="Search a location (e.g., Library, Hostel, OAT)..."
+            placeholder="Search for a link (e.g., Results, Hostel, Library)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-5 py-3 rounded-xl border border-gray-600 bg-white/90 text-gray-800 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md placeholder-gray-500"
@@ -225,7 +202,7 @@ export default function DtuNav() {
           </div>
         ) : (
           <div className="text-center text-gray-300 mt-10 text-lg font-medium">
-            No locations found 😔
+            No results found 😔
           </div>
         )}
 

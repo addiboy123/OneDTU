@@ -10,7 +10,8 @@ const Navbar = () => {
     { name: "HostelCart", path: "/hostelcart" },
     { name: "SocietyConnect", path: "/societyconnect" },
     { name: "FindMySpace", path: "/findmyspace" },
-    { name: "DTUNavigate", path: "/dtunavigate" },
+    { name: "DTUQuickLinks", path: "/dtuquicklinks" },
+    { name: "DTUNavigate", path: "/dtunav"}
   ];
 
   const [menuOpen, setMenuOpen] = useState(false);
