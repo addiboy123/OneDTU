@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Menu } from "lucide-react"; // ✅ RESPONSIVE: Import menu icon
+
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/hostelcart/Sidebar";
 import MainContent from "../components/hostelcart/MainContent";
@@ -8,9 +11,7 @@ import OtherItemModal from "../components/hostelcart/OtherItemModal";
 import LoginPromptModal from "../components/LoginPromptModal";
 import getDecodedToken from "../lib/auth";
 import api from "../api/interceptor";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-// derive auth from token in localStorage
 const isAuthenticated = () => Boolean(getDecodedToken());
 
 const HostelCart = () => {
@@ -23,7 +24,9 @@ const HostelCart = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const isAuth = isAuthenticated();
 
-  // decode token into currentUser on mount
+  // ✅ RESPONSIVE: State to manage sidebar visibility on mobile/tablet
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   useEffect(() => {
     const decoded = getDecodedToken();
     if (decoded) {
@@ -37,7 +40,7 @@ const HostelCart = () => {
       setCurrentUser(null);
     }
   }, []);
-  // Use React Query to fetch and cache items so data persists between component switches
+
   const queryClient = useQueryClient();
 
   const myItemsQuery = useQuery({
@@ -67,7 +70,6 @@ const HostelCart = () => {
     enabled: !isAuth,
   });
 
-  // Keep local states in sync with query data for components expecting arrays
   useEffect(() => {
     if (myItemsQuery.data) setUserItems(myItemsQuery.data);
   }, [myItemsQuery.data]);
@@ -81,60 +83,83 @@ const HostelCart = () => {
   }, [otherItemsQuery.data, publicItemsQuery.data, isAuth]);
 
   const handleSelectItem = (item, isUserItem) => {
-    if (!isAuthenticated()) {
+    if (!isAuth) {
       setIsLoginPromptOpen(true);
       return;
     }
     setSelectedItem(item);
     setIsItemDetailsModalOpen(true);
+    // ✅ RESPONSIVE: Close sidebar on item selection for better mobile UX
+    if (window.innerWidth < 1024) { // Tailwind's 'lg' breakpoint
+      setIsSidebarOpen(false);
+    }
   };
 
-  const isCurrentUserItem =
-    selectedItem && userItems.some((item) => item._id === selectedItem._id);
+  const isCurrentUserItem = selectedItem && userItems.some((item) => item._id === selectedItem._id);
 
   return (
-    <div>
-     <Navbar /> 
-      <div className="flex flex-1 overflow-hidden">
+    // ✅ RESPONSIVE: Main container ensures full height layout
+    <div className="flex flex-col h-screen bg-gray-50">
+      <Navbar />
+      {/* ✅ RESPONSIVE: Added `relative` to contain the absolutely positioned sidebar on mobile */}
+      <div className="flex flex-1 overflow-hidden relative">
         {isAuth && (
           <Sidebar
             items={userItems}
             onSelectItem={(item) => handleSelectItem(item, true)}
             selectedItemId={selectedItem?._id}
-            onAddItem={() => {
-              if (!isAuthenticated()) {
-                setIsLoginPromptOpen(true);
-                return;
-              }
-              setIsAddItemModalOpen(true);
-            }}
+            onAddItem={() => setIsAddItemModalOpen(true)}
             currentUserId={currentUser?.userId}
+            // ✅ RESPONSIVE: Pass state and handler to Sidebar
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+          />
+        )}
+        
+        {/* ✅ RESPONSIVE: Overlay for mobile view when sidebar is open */}
+        {isSidebarOpen && isAuth && (
+          <div 
+            onClick={() => setIsSidebarOpen(false)} 
+            className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+            aria-hidden="true"
           />
         )}
 
-        <MainContent
+        <main className="flex-1 flex flex-col overflow-y-auto">
+          {/* ✅ RESPONSIVE: Header with hamburger menu, only shows for logged-in users on mobile */}
+          {isAuth && (
+            <div className="flex items-center p-2 border-b bg-white lg:hidden sticky top-0 z-10">
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="p-2 text-gray-600 rounded-md hover:bg-gray-100 flex items-center gap-2"
+                aria-label="Open my items"
+              >
+                <Menu size={20} />
+                <span>My Items</span>
+              </button>
+            </div>
+          )}
+          <MainContent
             currentUserId={currentUser?.userId}
             allItems={otherItems}
             onSelectItem={(item) => handleSelectItem(item, false)}
-            isAuth={isAuth} // pass this new prop
-        />
-
+            isAuth={isAuth}
+          />
+        </main>
       </div>
 
+      {/* --- Modals --- */}
       <AddItemModal
         isOpen={isAddItemModalOpen}
         onClose={() => setIsAddItemModalOpen(false)}
         onItemAdded={(newItem) => {
-          // Update the cached myItems list so UI stays in sync across routes
           queryClient.setQueryData(["hostelcart", "myItems", currentUser?.userId], (old = []) => [
             ...old,
             newItem,
           ]);
-          // also update local state immediately for current view
           setUserItems((prev) => [...prev, newItem]);
         }}
       />
-
       {isCurrentUserItem ? (
         <MyItemModal
           isOpen={isItemDetailsModalOpen}
@@ -152,11 +177,7 @@ const HostelCart = () => {
           item={selectedItem}
         />
       )}
-
-      <LoginPromptModal
-        isOpen={isLoginPromptOpen}
-        onClose={() => setIsLoginPromptOpen(false)}
-      />
+      <LoginPromptModal isOpen={isLoginPromptOpen} onClose={() => setIsLoginPromptOpen(false)} />
     </div>
   );
 };
