@@ -39,8 +39,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/dtuquicklinks" element={<QuickLinks />} />
           <Route path="/dtunav" element={<DtuNav />} />
-
-          
+          <Route path="/chat" element={<Chat />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
