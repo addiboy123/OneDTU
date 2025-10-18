@@ -55,6 +55,14 @@ function FindMySpacePage() {
     }
   }, [rawData, activeTab, selectedPost]);
 
+  // ✅ Auto-close sidebar when user logs out
+  useEffect(() => {
+    if (!token) {
+      setIsSidebarOpen(false);
+    }
+  }, [token]);
+
+
   // --- Handlers ---
   const handleOpenFlatModal = (flat = null) => { setEditingFlat(flat); setIsFlatModalOpen(true); };
   const handleCloseFlatModal = () => { setEditingFlat(null); setIsFlatModalOpen(false); refetch(); };
@@ -111,60 +119,78 @@ function FindMySpacePage() {
   return (
     <div className="flex flex-col h-screen bg-gray-50 font-sans">
       <Navbar />
-      {/* ✅ RESPONSIVE: Added `relative` to contain the absolutely positioned sidebar on mobile */}
-      <div className="flex flex-1 overflow-hidden relative">
-        <Sidebar 
-          title={activeTab === 'FLAT' ? "Your Flat Posts" : "Your PG Posts"} 
-          posts={userOwnedPosts} 
-          onSidebarClick={handleSidebarClick}
-          onEditPost={activeTab === 'FLAT' ? handleOpenFlatModal : (post) => handleOpenPgPostModal(post, post.parentPG)}
-          onDeletePost={activeTab === 'FLAT' ? handleFlatDelete : handlePgPostDelete}
-          // ✅ RESPONSIVE: Pass state and handler to Sidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
-
-        {/* ✅ RESPONSIVE: Overlay for mobile view when sidebar is open */}
-        {isSidebarOpen && (
-          <div 
-            onClick={() => setIsSidebarOpen(false)} 
-            className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
-            aria-hidden="true"
-          />
-        )}
-
-        <main className="flex-1 flex flex-col overflow-y-auto">
-          {selectedPost ? (
-            <PostDetail 
-              key={selectedPost._id}
-              post={selectedPost} 
-              onBack={handleBackToListing} 
-              onOpenPgPostModal={handleOpenPgPostModal}
-              initialRoom={initialRoom}
-              onViewedInitialRoom={() => setInitialRoom(null)}
+        <div className="flex flex-1 overflow-hidden relative">
+          {/* ✅ Show Sidebar only when user is logged in */}
+          {token && (
+            <Sidebar 
+              title={activeTab === 'FLAT' ? "Your Flat Posts" : "Your PG Posts"} 
+              posts={userOwnedPosts} 
+              onSidebarClick={handleSidebarClick}
+              onEditPost={activeTab === 'FLAT' ? handleOpenFlatModal : (post) => handleOpenPgPostModal(post, post.parentPG)}
+              onDeletePost={activeTab === 'FLAT' ? handleFlatDelete : handlePgPostDelete}
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
             />
-          ) : (
-            <>
-              {/* ✅ RESPONSIVE: Header now includes hamburger menu button */}
-              <div className="flex items-center border-b border-gray-200 bg-white sticky top-0 z-10 px-4">
-                <button
-                  onClick={() => setIsSidebarOpen(true)}
-                  className="p-2 mr-2 text-gray-600 lg:hidden"
-                  aria-label="Open sidebar"
-                >
-                  <Menu size={24} />
-                </button>
-                <HeaderTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-              </div>
+          )}
 
-              {/* ✅ RESPONSIVE: Added a container for padding */}
-              <div className="p-4 sm:p-6 lg:p-8">
-                <PostGrid posts={posts} onPostClick={handlePostClick} isLoading={isLoading} isError={isError} />
-              </div>
+          {/* ✅ Only show overlay if sidebar is open AND user is logged in */}
+         {/* ✅ Only render sidebar if logged in AND explicitly open */}
+          {token && isSidebarOpen && (
+            <>
+              <Sidebar 
+                title={activeTab === 'FLAT' ? "Your Flat Posts" : "Your PG Posts"} 
+                posts={userOwnedPosts} 
+                onSidebarClick={handleSidebarClick}
+                onEditPost={activeTab === 'FLAT' ? handleOpenFlatModal : (post) => handleOpenPgPostModal(post, post.parentPG)}
+                onDeletePost={activeTab === 'FLAT' ? handleFlatDelete : handlePgPostDelete}
+                isOpen={true} // now always true since wrapped in conditional
+                onClose={() => setIsSidebarOpen(false)}
+              />
+
+              {/* Overlay only shown if sidebar is visible */}
+              <div 
+                onClick={() => setIsSidebarOpen(false)} 
+                className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+                aria-hidden="true"
+              />
             </>
           )}
-        </main>
-      </div>
+
+
+          <main className="flex-1 flex flex-col overflow-y-auto">
+            {selectedPost ? (
+              <PostDetail 
+                key={selectedPost._id}
+                post={selectedPost} 
+                onBack={handleBackToListing} 
+                onOpenPgPostModal={handleOpenPgPostModal}
+                initialRoom={initialRoom}
+                onViewedInitialRoom={() => setInitialRoom(null)}
+              />
+            ) : (
+              <>
+                <div className="flex items-center border-b border-gray-200 bg-white sticky top-0 z-10 px-4">
+                  {/* ✅ Disable hamburger if not logged in */}
+                  {token && (
+                    <button
+                      onClick={() => setIsSidebarOpen(true)}
+                      className="p-2 mr-2 text-gray-600 lg:hidden"
+                      aria-label="Open sidebar"
+                    >
+                      <Menu size={24} />
+                    </button>
+                  )}
+                  <HeaderTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+                </div>
+
+                <div className="p-4 sm:p-6 lg:p-8">
+                  <PostGrid posts={posts} onPostClick={handlePostClick} isLoading={isLoading} isError={isError} />
+                </div>
+              </>
+            )}
+          </main>
+        </div>
+
 
       {/* --- Modals --- */}
       {token && activeTab === 'FLAT' && !selectedPost && (
