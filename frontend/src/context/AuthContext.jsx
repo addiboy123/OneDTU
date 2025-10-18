@@ -9,22 +9,40 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // On initial app load, check localStorage for an existing token.
+  // Sync auth state from localStorage on load and when storage/auth-changed events occur.
   useEffect(() => {
-    try {
-      const storedToken = localStorage.getItem("token");
-      const storedUser = localStorage.getItem("user");
-      if (storedToken) {
+    const syncFromStorage = () => {
+      try {
+        const storedToken = localStorage.getItem("token");
+        const storedUser = localStorage.getItem("user");
         setToken(storedToken);
+        setUser(storedUser ? JSON.parse(storedUser) : null);
+      } catch (error) {
+        console.error("Failed to read auth data from localStorage", error);
+      } finally {
+        setLoading(false);
       }
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+    };
+
+    // Initial sync
+    syncFromStorage();
+
+    // Update when another tab/window or part of the app changes auth
+    const onStorage = (e) => {
+      // Only react if token or user keys changed (or null event)
+      if (!e || e.key === null || e.key === 'token' || e.key === 'user') {
+        syncFromStorage();
       }
-    } catch (error) {
-      console.error("Failed to read auth data from localStorage", error);
-    } finally {
-      setLoading(false);
-    }
+    };
+    const onAuthChanged = () => syncFromStorage();
+
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('auth-changed', onAuthChanged);
+
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('auth-changed', onAuthChanged);
+    };
   }, []);
 
   /**
@@ -37,6 +55,8 @@ export function AuthProvider({ children }) {
       setToken(data.token);
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+  // notify other parts of the app that auth changed
+  try { window.dispatchEvent(new Event('auth-changed')); } catch (e) {}
     }
     return data;
   };
@@ -61,6 +81,8 @@ export function AuthProvider({ children }) {
     setToken(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+  // notify other parts of the app that auth changed
+  try { window.dispatchEvent(new Event('auth-changed')); } catch (e) {}
   };
 
   const value = {
