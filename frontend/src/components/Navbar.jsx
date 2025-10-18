@@ -16,7 +16,6 @@ const Navbar = () => {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const menuRef = useRef();
   const userRef = useRef();
   const navigate = useNavigate();
 
@@ -36,12 +35,12 @@ const Navbar = () => {
       if (e.key === "token") setDecoded(getDecodedToken());
     };
 
-    document.addEventListener("click", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("auth-changed", onAuthChange);
     window.addEventListener("storage", onStorage);
 
     return () => {
-      document.removeEventListener("click", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("auth-changed", onAuthChange);
       window.removeEventListener("storage", onStorage);
     };
@@ -49,8 +48,8 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    window.dispatchEvent(new Event("auth-changed")); // Ensure other tabs know
     navigate("/");
-    window.location.reload();
   };
 
   return (
@@ -99,55 +98,60 @@ const Navbar = () => {
                 </Button>
               </>
             ) : (
-              <div className="relative flex items-center gap-3" ref={userRef}>
+              <div className="relative flex items-center gap-4" ref={userRef}>
                 <Link to="/chat" title="Chat">
-                  <MessageCircle className="text-gray-200 hover:text-white" size={20} />
+                  <MessageCircle className="text-gray-300 hover:text-white" size={22} />
                 </Link>
 
                 <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen((s) => !s)}
-                  className="flex items-center gap-2 p-1 rounded-full focus:outline-none"
-                >
-                  {userImage ? (
-                    <img
-                      src={userImage}
-                      alt="profile"
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
-                      {userName.charAt(0).toUpperCase()}
+                  <button
+                    onClick={() => setUserMenuOpen((s) => !s)}
+                    className="flex items-center gap-2 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                  >
+                    {userImage ? (
+                      <img
+                        src={userImage}
+                        alt="profile"
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
+                        {userName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </button>
+
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg border animate-fadeIn">
+                      <div className="px-4 py-2 text-sm text-gray-700 border-b">Hi, {userName}</div>
+                      <Link
+                        to="/profile"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="block px-4 py-2 text-sm hover:bg-gray-100"
+                      >
+                        Profile
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600"
+                      >
+                        Logout
+                      </button>
                     </div>
                   )}
-                </button>
-
-                {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white text-black rounded-md shadow-lg border animate-fadeIn">
-                    <div className="px-4 py-2 text-sm">Hi, {userName}</div>
-                    <div className="border-t" />
-                    <Link
-                      to="/profile"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      Profile
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
+                </div>
               </div>
-            </div>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          {/* ✅ FIX: Mobile Menu Button & Chat Icon */}
+          <div className="md:hidden flex items-center gap-4">
+            {/* Conditionally render chat icon for logged-in users */}
+            {isLoggedIn && (
+              <Link to="/chat" title="Chat">
+                <MessageCircle className="text-gray-300 hover:text-white" size={22} />
+              </Link>
+            )}
             <button
               onClick={() => setMenuOpen((s) => !s)}
               className="text-gray-300 hover:text-white focus:outline-none"
@@ -160,28 +164,28 @@ const Navbar = () => {
 
       {/* Mobile Dropdown Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-[#0d1117]/95 backdrop-blur-lg border-t border-gray-700">
-          <div className="flex flex-col items-start space-y-2 px-6 py-4">
+        <div className="md:hidden bg-[#0d1117]/95 backdrop-blur-lg border-t border-gray-700 animate-fadeIn">
+          <div className="flex flex-col items-start space-y-1 px-4 pt-2 pb-4">
             {navLinks.map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
                 onClick={() => setMenuOpen(false)}
-                className="w-full text-gray-300 hover:text-white py-2 border-b border-gray-800 text-sm"
+                className="w-full text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-md py-2 px-3 text-base"
               >
                 {link.name}
               </Link>
             ))}
 
-            <div className="w-full mt-3">
+            <div className="w-full pt-3 mt-2 border-t border-gray-700">
               {!isLoggedIn ? (
-                <div className="flex flex-col space-y-2 w-full">
+                <div className="flex flex-col space-y-3 w-full">
                   <Button
                     variant="outline"
                     asChild
                     className="border-blue-600 text-blue-400 hover:bg-blue-600/20 w-full"
                   >
-                    <Link to="/signup" onClick={() => setMenuOpen(false)}>
+                    <Link to="/signup" onClick={() => setMenu-Open(false)}>
                       Sign Up
                     </Link>
                   </Button>
@@ -195,38 +199,36 @@ const Navbar = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="w-full border-t border-gray-700 pt-3">
-                  <div className="flex items-center gap-3">
+                <div className="w-full">
+                  <div className="flex items-center gap-3 px-3 mb-2">
                     {userImage ? (
                       <img
                         src={userImage}
                         alt="profile"
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-9 h-9 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white">
+                      <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
                         {userName.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <span className="text-gray-300 text-sm">
-                      Hi, {userName}
+                    <span className="text-gray-200 font-medium">
+                      {userName}
                     </span>
                   </div>
-                  <div className="mt-2 flex flex-col">
-                    <Link
-                      to="/profile"
-                      onClick={() => setMenuOpen(false)}
-                      className="text-gray-300 hover:text-white py-1 text-sm"
-                    >
-                      Profile
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="text-gray-300 hover:text-white py-1 text-sm text-left"
-                    >
-                      Logout
-                    </button>
-                  </div>
+                  <Link
+                    to="/profile"
+                    onClick={() => setMenuOpen(false)}
+                    className="w-full block text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-md py-2 px-3 text-base"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full block text-left text-red-400 hover:text-white hover:bg-gray-700/50 rounded-md py-2 px-3 text-base"
+                  >
+                    Logout
+                  </button>
                 </div>
               )}
             </div>
