@@ -2,7 +2,7 @@ const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
-const { UnauthenticatedError } = require("../errors");
+const { UnauthenticatedError, BadRequestError } = require("../errors");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -66,6 +66,10 @@ const register = async (req, res) => {
 
   const { email, name, password } = req.body;
 
+  // Validate presence of required fields early to give a clear error message
+  if (!email || !name || !password) {
+    throw new BadRequestError('Please provide name, email and password');
+  }
 
   const user = await User.create({ email, name, password });
   const token = user.createJWT();
