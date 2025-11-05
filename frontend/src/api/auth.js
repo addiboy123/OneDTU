@@ -29,3 +29,10 @@ export async function googleLogin(credential) {
   const res = await axios.post(url, payload);
   return res.data;
 }
+
+export async function societyAdminLogin(credentials) {
+  const base = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  const url = `${base}/societyconnect/society-admin/login`;
+  const res = await axios.post(url, credentials);
+  return res.data;
+}

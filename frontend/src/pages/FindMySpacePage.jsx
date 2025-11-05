@@ -12,7 +12,7 @@ import HeaderTabs from "../components/findmyspace/HeaderTabs";
 import Modal from "../components/findmyspace/Modal";
 import FlatForm from "../components/findmyspace/FlatForm";
 import PgPostForm from "../components/findmyspace/PgPostForm";
-import * as api from "../services/findMySpaceAPI";
+import * as api from "../api/findMySpaceAPI";
 import { useAuth } from "../context/AuthContext";
 
 function FindMySpacePage() {

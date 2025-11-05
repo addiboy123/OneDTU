@@ -7,6 +7,8 @@ import HostelCart from "./pages/Hostelcart";
 import Profile from "./pages/Profile";
 import SocietyConnect from "./pages/Societyconnect";
 import Society from "./pages/Society";
+import MaintainSociety from "./pages/MaintainSociety";
+import RequireSocietyAdmin from "./components/societyconnect/RequireSocietyAdmin";
 import FindMySpace from "./pages/FindMySpacePage";
 import QuickLinks from "./pages/QuickLinks";
 import DtuNav from "./pages/DtuNav";
@@ -37,6 +39,7 @@ function App() {
           <Route path="/societyconnect/:name" element={<Society />} />
           <Route path="/findmyspace" element={<FindMySpace />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/maintain-society" element={<RequireSocietyAdmin><MaintainSociety /></RequireSocietyAdmin>} />
           <Route path="/dtuquicklinks" element={<QuickLinks />} />
           <Route path="/dtunav" element={<DtuNav />} />
           <Route path="/chat" element={<Chat />} />
