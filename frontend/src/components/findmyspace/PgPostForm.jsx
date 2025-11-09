@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 function PgPostForm({ onSubmit, existingPost = null, pgId, onCancel }) {
   const [formData, setFormData] = useState({ title: '', description: '', roommates_required: '' });
   const [roomImage, setRoomImage] = useState(null);
+  const [errorNoImage, setErrorNoImage] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (existingPost) {
@@ -18,15 +20,29 @@ function PgPostForm({ onSubmit, existingPost = null, pgId, onCancel }) {
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleImageChange = (e) => setRoomImage(e.target.files[0]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // require an image for new posts
+    if (!existingPost && !roomImage) {
+      setErrorNoImage(true);
+      return;
+    }
+
+    setErrorNoImage(false);
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
     if (roomImage) {
       data.append('images', roomImage); // Backend expects 'images' field for multer
     }
     data.append('pgId', pgId); // Crucial for associating with the parent PG
-    onSubmit(data);
+
+    try {
+      setSubmitting(true);
+      await Promise.resolve(onSubmit(data));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -40,10 +56,17 @@ function PgPostForm({ onSubmit, existingPost = null, pgId, onCancel }) {
       </div>
       <div className="flex justify-end gap-4 pt-4">
         <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
-        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          {existingPost ? 'Update Room' : 'Add Room'}
+        <button
+          type="submit"
+          disabled={submitting}
+          className={`px-4 py-2 text-white rounded ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+        >
+          {submitting ? (existingPost ? 'Updating...' : 'Adding...') : (existingPost ? 'Update Room' : 'Add Room')}
         </button>
       </div>
+      {errorNoImage && (
+        <div className="mt-2 text-sm text-red-500">Please add an image for the room.</div>
+      )}
     </form>
   );
 }

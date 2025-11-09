@@ -10,6 +10,8 @@ function FlatForm({ onSubmit, existingFlat = null, onCancel }) {
     distanceFromDtu: '',
   });
   const [images, setImages] = useState([]);
+  const [errorNoImage, setErrorNoImage] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (existingFlat) {
@@ -31,14 +33,30 @@ function FlatForm({ onSubmit, existingFlat = null, onCancel }) {
     setImages([...e.target.files]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // require at least one image
+    if (!existingFlat && images.length === 0) {
+      setErrorNoImage(true);
+      return;
+    }
+
+    setErrorNoImage(false);
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
     if (images.length > 0) {
       images.forEach(image => data.append('images', image));
     }
-    onSubmit(data);
+
+    // lock submit button while submitting
+    try {
+      setSubmitting(true);
+      // allow onSubmit to be sync or return a promise
+      await Promise.resolve(onSubmit(data));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -57,10 +75,17 @@ function FlatForm({ onSubmit, existingFlat = null, onCancel }) {
       
       <div className="flex justify-end gap-4 pt-4">
         <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
-        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-          {existingFlat ? 'Update Flat' : 'Create Flat'}
+        <button
+          type="submit"
+          disabled={submitting}
+          className={`px-4 py-2 text-white rounded ${submitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+        >
+          {submitting ? (existingFlat ? 'Updating...' : 'Creating...') : (existingFlat ? 'Update Flat' : 'Create Flat')}
         </button>
       </div>
+      {errorNoImage && (
+        <div className="mt-2 text-sm text-red-500">Please add at least one image for the listing.</div>
+      )}
     </form>
   );
 }
