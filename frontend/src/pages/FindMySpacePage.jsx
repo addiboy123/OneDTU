@@ -22,6 +22,7 @@ function FindMySpacePage() {
 
   const [activeTab, setActiveTab] = useState("FLAT");
   const [posts, setPosts] = useState([]);
+  const [myFlats, setMyFlats] = useState([]);
   const [selectedPost, setSelectedPost] = useState(null);
   const [initialRoom, setInitialRoom] = useState(null);
   
@@ -56,6 +57,24 @@ function FindMySpacePage() {
     }
   }, [rawData, activeTab, selectedPost]);
 
+  // Fetch current user's flats (for Sidebar thumbnails)
+  const fetchMyFlats = async () => {
+    if (!token) {
+      setMyFlats([]);
+      return;
+    }
+    try {
+      const res = await api.getMyFlats(token);
+      setMyFlats(res.data?.flats || []);
+    } catch (err) {
+      console.error('Error fetching my flats:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchMyFlats();
+  }, [token, activeTab]);
+
   // ✅ Auto-close sidebar when user logs out
   useEffect(() => {
     if (!token) {
@@ -68,12 +87,16 @@ function FindMySpacePage() {
   const handleOpenFlatModal = (flat = null) => { setEditingFlat(flat); setIsFlatModalOpen(true); };
   const handleCloseFlatModal = () => { setEditingFlat(null); setIsFlatModalOpen(false); refetch(); };
   const handleFlatSubmit = async (formData) => {
-    await createFlat(formData,token);
-    handleCloseFlatModal();
+  await createFlat(formData,token);
+  // refresh sidebar list so the newly created flat appears immediately
+  await fetchMyFlats();
+  handleCloseFlatModal();
   };
   const handleFlatDelete = async (flatId) => {
     await deleteFlat(flatId,token);
     refetch();
+    // refresh user's flats for sidebar
+    await fetchMyFlats();
   };
   const handleOpenPgPostModal = (post = null, pgId) => {
     setEditingPgPost(post);
@@ -125,7 +148,7 @@ function FindMySpacePage() {
           {token && (
             <Sidebar 
               title={activeTab === 'FLAT' ? "Your Flat Posts" : "Your PG Posts"} 
-              posts={userOwnedPosts} 
+              posts={activeTab === 'FLAT' ? myFlats : userOwnedPosts} 
               onSidebarClick={handleSidebarClick}
               onEditPost={activeTab === 'FLAT' ? handleOpenFlatModal : (post) => handleOpenPgPostModal(post, post.parentPG)}
               onDeletePost={activeTab === 'FLAT' ? handleFlatDelete : handlePgPostDelete}

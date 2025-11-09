@@ -11,6 +11,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 //  Flat routes
 router.get('/flats', flatController.getAllFlats);
+router.get('/my/flats', authentication, flatController.getMyFlats);
 router.get('/flat/:id', flatController.getFlatById);
 router.post('/flat', authentication, upload.array('images', 6), flatController.createFlat);
 router.put('/flat/:id', authentication,  upload.array('images', 6),flatController.updateFlat);

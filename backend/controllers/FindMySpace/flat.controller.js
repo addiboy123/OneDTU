@@ -15,6 +15,17 @@ exports.getAllFlats = async (req, res) => {
 };
 
 /**
+ * @desc    Get flats created by the currently authenticated user
+ * @route   GET /api/v1/findmyspace/my/flats
+ * @access  Private
+ */
+exports.getMyFlats = async (req, res) => {
+    const { userId } = req.user;
+    const flats = await FlatPost.find({ createdBy: userId }).sort('-createdAt');
+    res.status(StatusCodes.OK).json({ count: flats.length, flats });
+};
+
+/**
  * @desc    Get a single flat by its ID
  * @route   GET /api/v1/flat/:id
  * @access  Public

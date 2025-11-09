@@ -23,6 +23,11 @@ const getAuthHeadersMultiPart = (token) => ({
 export const getAllFlats = () => apiClient.get('/flats');
 export const getAllPGs = () => apiClient.get('/PGs');
 
+// --- User-specific Flat retrieval ---
+export const getMyFlats = (token) => {
+  return apiClient.get('/my/flats', getAuthHeaders(token));
+};
+
 // --- Flat CRUD Operations ---
 export const createFlat = (formData, token) => {
   return apiClient.post('/flat', formData, getAuthHeadersMultiPart(token));
