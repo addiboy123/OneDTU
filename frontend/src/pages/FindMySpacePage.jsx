@@ -14,6 +14,7 @@ import FlatForm from "../components/findmyspace/FlatForm";
 import PgPostForm from "../components/findmyspace/PgPostForm";
 import * as api from "../api/findMySpaceAPI";
 import { useAuth } from "../context/AuthContext";
+import { createFlat,deleteFlat,createPgPost,deletePgPost } from "../api/findMySpaceAPI.js";
 
 function FindMySpacePage() {
   const { user, token } = useAuth();
@@ -67,11 +68,11 @@ function FindMySpacePage() {
   const handleOpenFlatModal = (flat = null) => { setEditingFlat(flat); setIsFlatModalOpen(true); };
   const handleCloseFlatModal = () => { setEditingFlat(null); setIsFlatModalOpen(false); refetch(); };
   const handleFlatSubmit = async (formData) => {
-    // Logic for submitting...
+    await createFlat(formData,token);
     handleCloseFlatModal();
   };
   const handleFlatDelete = async (flatId) => {
-    // Logic for deleting...
+    await deleteFlat(flatId,token);
     refetch();
   };
   const handleOpenPgPostModal = (post = null, pgId) => {
@@ -81,11 +82,11 @@ function FindMySpacePage() {
   };
   const handleClosePgPostModal = () => { setEditingPgPost(null); setIsPgPostModalOpen(false); refetch(); };
   const handlePgPostSubmit = async (formData) => {
-    // Logic for submitting...
+    await createPgPost(formData,token)
     handleClosePgPostModal();
   };
   const handlePgPostDelete = async (postId) => {
-    // Logic for deleting...
+    await deletePgPost(postId,token);
     refetch();
   };
   
