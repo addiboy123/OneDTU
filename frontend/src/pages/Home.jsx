@@ -10,6 +10,29 @@ const Home = () => {
     { title: "DTUNavigate", desc: "Navigate DTU with real-time maps and guidance." },
   ];
 
+  const contributors = [
+    {
+      name: "Aditya Bibhas Sahu",
+      desc: "Passionate developer contributing to core architecture.",
+      img: "/images/sahu.jpeg",
+    },
+    {
+      name: "Siddharth Maurya",
+      desc: "Works on backend systems, integrations and deployments",
+      img: "/images/maurya.jpeg",
+    },
+    {
+      name: "Ayush Verma",
+      desc: "Focused on frontend experience and UI enhancement",
+      img: "/images/verma.jpeg",
+    },
+    {
+      name: "Aradhay Jain",
+      desc: "Improves product workflows and feature pipelines.",
+      img: "/images/jain.jpeg",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
       <Navbar />
@@ -55,6 +78,20 @@ const Home = () => {
             <div key={f.title} className="bg-[#1f2937] p-6 rounded-xl shadow-md hover:shadow-lg transition duration-300">
               <h3 className="text-xl font-semibold mb-3 text-blue-400">{f.title}</h3>
               <p className="text-gray-300 text-sm">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Contributors Section */}
+      <section className="py-20 px-6 bg-[#0f1623]">
+        <h2 className="text-4xl font-bold text-center mb-12">Original Contributors</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 max-w-6xl mx-auto text-center">
+          {contributors.map((c) => (
+            <div key={c.name} className="bg-[#1f2937] p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300">
+              <img src={c.img} className="w-24 h-24 rounded-full mx-auto mb-4 object-cover" />
+              <h3 className="text-xl font-semibold mb-2">{c.name}</h3>
+              <p className="text-gray-300 text-sm">{c.desc}</p>
             </div>
           ))}
         </div>
