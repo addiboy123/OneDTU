@@ -141,9 +141,7 @@ npm install
 npm start
 
 # 4️⃣ Setup & Run the Frontend (in a new terminal)
-# Navigate to the frontend folder (from the root 'OneDTU' directory)
-cd OneDTU/frontend 
-# (Alternatively, if your first terminal is still in /backend, you can use: cd ../frontend)
+cd ../frontend
 
 # Create a .env file from the example
 cp .env.example .env
