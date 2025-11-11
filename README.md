@@ -119,7 +119,7 @@ We welcome contributions from all skill levels. Follow these simple steps:
 
 ---
 
-## ⚙️ Installation & Setup
+⚙️ Installation & Setup
 
 To run this project locally:
 
@@ -130,18 +130,27 @@ git clone https://github.com/addiboy123/OneDTU.git
 # 2️⃣ Navigate into the project folder
 cd OneDTU
 
-# 3️⃣ Install dependencies for backend
+# 3️⃣ Setup & Run the Backend
 cd backend
+# Create a .env file from the example
+cp backend.env.example .env
+# ⭐️ Add your secret variables (like database URI, etc.) to the new .env file
+# Install dependencies
 npm install
-
-# 4️⃣ Run the backend server
+# Run the backend server
 npm start
 
-# 5️⃣ Open a new terminal window for frontend
-cd ../frontend
-npm install
+# 4️⃣ Setup & Run the Frontend (in a new terminal)
+# Navigate to the frontend folder (from the root 'OneDTU' directory)
+cd OneDTU/frontend 
+# (Alternatively, if your first terminal is still in /backend, you can use: cd ../frontend)
 
-# 6️⃣ Start the frontend development server
+# Create a .env file from the example
+cp frontend.env.example .env
+# ⭐️ Add your public variables (like the backend API URL) to the new .env file
+# Install dependencies
+npm install
+# Start the frontend development server
 npm run dev
 ```
 ---
