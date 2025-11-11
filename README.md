@@ -133,7 +133,7 @@ cd OneDTU
 # 3️⃣ Setup & Run the Backend
 cd backend
 # Create a .env file from the example
-cp backend.env.example .env
+cp .env.example .env
 # ⭐️ Add your secret variables (like database URI, etc.) to the new .env file
 # Install dependencies
 npm install
@@ -146,7 +146,7 @@ cd OneDTU/frontend
 # (Alternatively, if your first terminal is still in /backend, you can use: cd ../frontend)
 
 # Create a .env file from the example
-cp frontend.env.example .env
+cp .env.example .env
 # ⭐️ Add your public variables (like the backend API URL) to the new .env file
 # Install dependencies
 npm install
