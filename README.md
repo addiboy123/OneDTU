@@ -15,7 +15,7 @@
 ---
 
 ## 🌐 Live Preview
-🔗 [Visit OneDTU](http://72.155.88.241/)
+🔗 [Visit OneDTU](https://onedtu.info/)
 
 ---
 
