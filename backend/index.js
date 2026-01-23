@@ -46,7 +46,8 @@ app.use(helmet());
 const allowedOrigins = [
   "http://localhost:5173",
   "https://one-dtu.vercel.app",
-  "https://onedtu.info"
+  "https://onedtu.info",
+  "https://www.onedtu.info",
 ];
 
 app.use(cors({
