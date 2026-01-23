@@ -42,8 +42,14 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use(helmet());
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://onedtu.onrender.com/",
+];
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(xss());
